@@ -44,14 +44,10 @@ async function addAlbumToCollection(album, artist, year) {
 
     collection.albums.push(newAlbum);
     collection.albums.sort((a, b) => {
-        // remove "the" for sorting
-        if (a.album.startsWith('The ') || a.album.startsWith('the ')) {
-            a.album = a.album.slice(4);
-        }
-        if (b.album.startsWith('The ') || b.album.startsWith('the ')) {
-            b.album = b.album.slice(4);
-        }
-        return a.artist.localeCompare(b.artist) || a.year - b.year; // sort by artist then year
+        // remove "the" for sorting 
+        const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+        const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+        return artistA.localeCompare(artistB) || a.year - b.year; // sort by artist, then year
     });
 
     await fsPromises.writeFile(

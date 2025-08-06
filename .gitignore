@@ -4,3 +4,4 @@ node_modules
 .env
 !shuffle.png
 !src/covers/unknown.png
+src/collection.json
