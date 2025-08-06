@@ -108,10 +108,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     shuffleButton.addEventListener('click', () => {
         if (albums.length === 0) return;
-
-        currentIndex = getRandomIndex(albums.length);
-        updateDisplay();
+        shuffleAlbums();
     });
+
+    function shuffleAlbums() {
+        const shuffleTime = 1 * 1000 + Math.random() * 2000; // 1 - 3 seconds
+        const startTime = Date.now();
+        
+        const shuffleInterval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % albums.length;
+            updateDisplay();
+            
+            if (Date.now() - startTime >= shuffleTime) {
+                clearInterval(shuffleInterval);
+                // selected album
+                currentIndex = getRandomIndex(albums.length);
+                updateDisplay();
+            }
+        }, 100); // update every 100ms 
+    }
 
     addAlbumButton.addEventListener('click', async () => {
         try {

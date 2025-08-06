@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const LASTFM_API_KEY = process.env.LASTFM_API_KEY;
+if (!LASTFM_API_KEY) {
+    throw new Error('LASTFM_API_KEY is not set in the environment variables');
+}
 const __dirname = path.resolve();
 const COLLECTION_PATH = path.join(__dirname, 'src', 'collection.json');
 

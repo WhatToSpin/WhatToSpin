@@ -27,6 +27,10 @@ export function registerIpcHandlers() {
         }
     });
 
+    ipcMain.handle('debug', (event, message) => {
+        console.log(message);
+    });
+
     ipcMain.handle('open-popup', async (event) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         
