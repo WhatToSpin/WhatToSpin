@@ -43,6 +43,7 @@ export function registerIpcHandlers() {
             height: popupHeight,
             x: popupX,
             y: popupY,
+            resizable: false,
             movable: false,
             frame: false,
             parent: mainWindow,

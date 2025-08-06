@@ -18,6 +18,7 @@ async function createWindow() {
         width: 600,
         height: 400,
         show: false,
+        resizable: false,
         webPreferences: {
             contextIsolation: true,
             enableRemoteModule: false,
