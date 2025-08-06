@@ -3,3 +3,4 @@ node_modules
 .log
 .env
 !shuffle.png
+!src/covers/unknown.png

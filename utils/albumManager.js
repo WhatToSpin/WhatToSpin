@@ -22,7 +22,18 @@ async function addAlbumToCollection(album, artist, year) {
         await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
     }
 
-    const coverPath = await getAlbumCover(album, artist);
+    // make sure album does not already exist
+    const existingAlbum = collection.albums.find(
+        (a) => a.album === album && a.artist === artist
+    );
+    if (existingAlbum) {
+        throw new Error('Album already exists in the collection');
+    }
+
+    let coverPath = await getAlbumCover(album, artist);
+    if (!coverPath) {
+        coverPath = path.join(__dirname, 'src', 'covers', 'unknown.png');
+    }
 
     const newAlbum = {
         album: album,
@@ -33,6 +44,13 @@ async function addAlbumToCollection(album, artist, year) {
 
     collection.albums.push(newAlbum);
     collection.albums.sort((a, b) => {
+        // remove "the" for sorting
+        if (a.album.startsWith('The ') || a.album.startsWith('the ')) {
+            a.album = a.album.slice(4);
+        }
+        if (b.album.startsWith('The ') || b.album.startsWith('the ')) {
+            b.album = b.album.slice(4);
+        }
         return a.artist.localeCompare(b.artist) || a.year - b.year; // sort by artist then year
     });
 
@@ -65,7 +83,7 @@ async function getAlbumCover(album, artist) {
 
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error(`Failed to fetch album data: ${response.statusText}`);
+        return null;
     }
 
     const data = await response.json();

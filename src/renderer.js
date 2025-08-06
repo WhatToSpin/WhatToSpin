@@ -104,13 +104,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         imgElement.onload = function() {
             this.style.display = 'block';
         };
-    }
+    }   
 
     shuffleButton.addEventListener('click', () => {
         if (albums.length === 0) return;
 
         currentIndex = getRandomIndex(albums.length);
         updateDisplay();
+    });
+
+    addAlbumButton.addEventListener('click', async () => {
+        try {
+            window.electronAPI.debug('Opening add album popup...');
+            await window.electronAPI.openPopup();
+        } catch (error) {
+            console.error('Error adding album:', error);
+            alert('Failed to add album. Please try again.');
+        }
     });
 
     leftCover.addEventListener('click', () => {
@@ -134,19 +144,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     updateDisplay();
-});
-
-document.getElementById('addAlbumButton').addEventListener('click', async () => {
-    try {
-        const newAlbum = await window.electronAPI.addAlbum();
-        if (newAlbum) {
-            albums.push(newAlbum);
-            currentIndex = albums.length - 1;
-            updateDisplay();
-        }
-    } catch (error) {
-        console.error('Error adding album:', error);
-    }
 });
 
 function getRandomIndex(length) {
