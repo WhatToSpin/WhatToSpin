@@ -22,6 +22,38 @@ async function addAlbumToCollection(album, artist, year) {
         await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
     }
 
+    const coverPath = await getAlbumCover(album, artist);
+
+    const newAlbum = {
+        album: album,
+        artist: artist,
+        year: year,
+        cover: coverPath,
+    };
+
+    collection.albums.push(newAlbum);
+    collection.albums.sort((a, b) => {
+        return a.artist.localeCompare(b.artist) || a.year - b.year; // sort by artist then year
+    });
+
+    await fsPromises.writeFile(
+        COLLECTION_PATH,
+        JSON.stringify(collection, null, 2)
+    );
+}
+
+async function getAlbumsFromCollection() {
+    try {
+        const collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
+        const albumsData = JSON.parse(collection).albums;
+        return albumsData;
+    } catch (error) {
+        console.error('Error loading albums:', error);
+        return [];
+    }
+}
+
+async function getAlbumCover(album, artist) {
     const params = new URLSearchParams({
         method: 'album.getinfo',
         api_key: LASTFM_API_KEY,
@@ -43,25 +75,11 @@ async function addAlbumToCollection(album, artist, year) {
     const cover = covers.find(img => img.size === 'large') || covers[0];
     const coverPath = await saveAlbumCover(album, artist, cover);
 
-    const newAlbum = {
-        album: album,
-        artist: artist,
-        year: year,
-        cover: coverPath,
-    };
-
-    collection.albums.push(newAlbum);
-    collection.albums.sort((a, b) => {
-        return a.artist.localeCompare(b.artist) || a.year - b.year; // sort by artist then year
-    });
-
-    await fsPromises.writeFile(
-        COLLECTION_PATH,
-        JSON.stringify(collection, null, 2)
-    );
+    return coverPath;
 }
 
 async function saveAlbumCover(album, artist, cover) {
+
     const coverDir = path.join(__dirname, 'covers');
 
     const coverUrl = cover['#text'];
@@ -78,20 +96,9 @@ async function saveAlbumCover(album, artist, cover) {
     }
 
     const buffer = await response.arrayBuffer();
-    await fsPromises.writeFile(coverPath, Buffer.from(buffer));
+    fs.writeFileSync(coverPath, Buffer.from(buffer));
 
     return coverPath;
-}
-
-async function getAlbumsFromCollection() {
-    try {
-        const collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
-        const albumsData = JSON.parse(collection).albums;
-        return albumsData;
-    } catch (error) {
-        console.error('Error loading albums:', error);
-        return [];
-    }
 }
 
 export {
