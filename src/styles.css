@@ -17,7 +17,7 @@ body {
 }
 
 .cover {
-    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s ease;
+    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
     position: absolute;
     width: 200px;
     height: 200px;
@@ -28,33 +28,158 @@ body {
     color: #666;
     object-fit: cover; 
     overflow: hidden;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.3));
 }
 
 .cover.center {
     transform: scale(1);
-    z-index: 2;
+    z-index: 3;
+}
+
+.cover.center:hover {
+    transform: scale(1) translateY(-5px);
 }
 
 .cover.left {
-    transform: scale(0.8) translateX(-200px);
-    opacity: 0.7;
-    z-index: 1;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.1));
+    transform: scale(0.8) translateX(-150px);
+    z-index: 2;
+    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.2));
+    filter: brightness(0.8);
+    cursor: pointer;
+}
+
+.cover.left:hover {
+    transform: scale(0.8) translateX(-150px) translateY(-10px);
+    filter: brightness(1);
 }
 
 .cover.right {
-    transform: scale(0.8) translateX(200px);
-    opacity: 0.7;
+    transform: scale(0.8) translateX(150px);
+    z-index: 2;
+    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.2));
+    filter: brightness(0.8);
+    cursor: pointer;
+}
+
+.cover.right:hover {
+    transform: scale(0.8) translateX(150px) translateY(-10px);
+    filter: brightness(1);
+}
+
+.cover.way-left {
+    transform: scale(0.6) translateX(-350px);
     z-index: 1;
     filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.1));
+    filter: brightness(0.6);
+    cursor: pointer;
+}
+
+.cover.way-left:hover {
+    transform: scale(0.6) translateX(-350px) translateY(-10px);
+    filter: brightness(1);
+}
+
+.cover.way-right {
+    transform: scale(0.6) translateX(350px);
+    z-index: 1;
+    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.1));
+    filter: brightness(0.6);
+    cursor: pointer;
+}
+
+.cover.way-right:hover {
+    transform: scale(0.6) translateX(350px) translateY(-10px);
+    filter: brightness(1);
+}
+
+.album-info-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    min-height: 80px;
+}
+
+.album-info {
+    text-align: center;
+    flex: 1;
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.left-button {
+    position: absolute;
+    left: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.right-button {
+    position: absolute;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.shuffle-icon {
+    background: url('./images/shuffle.png') no-repeat center center;
+    background-size: contain;
+    height: 24px;
+    width: 24px;
+}
+
+.shuffle-icon:hover {
+    filter: brightness(0.8);
+    transform: scale(1.1);
+    translate: transform 0.3s ease;
+}
+
+.shuffle-icon:active {
+    transform: translateY(2px);
+    transition: transform 0.1s ease;
+}
+
+.add-icon {
+    height: 24px;
+    width: 24px;
+    font-weight: 500;
+    font-size: 30px;
+}
+
+.add-icon:hover {
+    filter: brightness(0.8);
+    transform: scale(1.1);
+    translate: transform 0.3s ease;
+}
+
+.add-icon:active {
+    transform: translateY(2px);
+    transition: transform 0.1s ease;
 }
 
 h1 {
     color: #333;
     font-size: 20px;
-    margin-top: 20px;
+    margin: 20px 0 5px;
     transition: opacity 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 h2 {
@@ -62,11 +187,15 @@ h2 {
     font-size: 18px;
     margin: 5px 0;
     transition: opacity 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 p {
     color: #888;
     font-size: 12px;
+    font-weight: bold;
     margin: 5px 0;
     transition: opacity 0.3s ease;
 }

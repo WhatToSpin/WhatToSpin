@@ -4,19 +4,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const artistName = document.getElementById('artistName');
     const year = document.getElementById('year');
     
+    const wayLeftCover = document.getElementById('wayLeftCover');
     const leftCover = document.getElementById('leftCover');
     const centerCover = document.getElementById('centerCover');
     const rightCover = document.getElementById('rightCover');
+    const wayRightCover = document.getElementById('wayRightCover');
+
+    const addAlbumButton = document.getElementById('addAlbumButton');
+    const shuffleButton = document.getElementById('shuffleButton');
     
     let albums = [];
     let currentIndex = 0;
     
     try {
-        albums = await window.electronAPI.getAlbums();
-        console.log('Albums loaded:', albums);
-        
+        albums = await window.electronAPI.getAlbums();        
         if (albums.length > 0) {
-            const randomAlbum = await window.electronAPI.getRandomAlbum();
+            currentIndex = getRandomIndex(albums.length);
+            const randomAlbum = albums[currentIndex];
             if (randomAlbum) {
                 currentIndex = albums.findIndex(album => 
                     album.album === randomAlbum.album && 
@@ -36,9 +40,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             artistName.textContent = 'Add some albums to get started';
             year.textContent = '';
             
+            wayLeftCover.src = '';
             leftCover.src = '';
             centerCover.src = '';
             rightCover.src = '';
+            wayRightCover.src = '';
             return;
         }
         
@@ -52,13 +58,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateCoverImages() {
         if (albums.length === 0) return;
-        
+
+        const wayLeftIndex = (currentIndex - 2 + albums.length) % albums.length;
         const leftIndex = (currentIndex - 1 + albums.length) % albums.length;
         const rightIndex = (currentIndex + 1) % albums.length;
+        const wayRightIndex = (currentIndex + 2) % albums.length;
         
+        setCoverImage(wayLeftCover, albums[wayLeftIndex]);
         setCoverImage(leftCover, albums[leftIndex]);
         setCoverImage(centerCover, albums[currentIndex]);
         setCoverImage(rightCover, albums[rightIndex]);
+        setCoverImage(wayRightCover, albums[wayRightIndex]);
     }
 
     function setCoverImage(imgElement, album) {
@@ -96,6 +106,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
+    shuffleButton.addEventListener('click', () => {
+        if (albums.length === 0) return;
+
+        currentIndex = getRandomIndex(albums.length);
+        updateDisplay();
+    });
+
     leftCover.addEventListener('click', () => {
         currentIndex = (currentIndex - 1 + albums.length) % albums.length;
         updateDisplay();
@@ -106,11 +123,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDisplay();
     });
 
+    wayLeftCover.addEventListener('click', () => {
+        currentIndex = (currentIndex - 2 + albums.length) % albums.length;
+        updateDisplay();
+    });
+
+    wayRightCover.addEventListener('click', () => {
+        currentIndex = (currentIndex + 2) % albums.length;
+        updateDisplay();
+    });
+
     updateDisplay();
+});
+
+document.getElementById('addAlbumButton').addEventListener('click', async () => {
+    try {
+        const newAlbum = await window.electronAPI.addAlbum();
+        if (newAlbum) {
+            albums.push(newAlbum);
+            currentIndex = albums.length - 1;
+            updateDisplay();
+        }
+    } catch (error) {
+        console.error('Error adding album:', error);
+    }
 });
 
 function getRandomIndex(length) {
     return Math.floor(Math.random() * length);
 }
-
-

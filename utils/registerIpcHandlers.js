@@ -1,5 +1,5 @@
-import { ipcMain, shell } from 'electron';
-import { addAlbumToCollection, getRandomAlbum, getAlbumsFromCollection } from './albumManager.js';
+import { ipcMain } from 'electron';
+import { addAlbumToCollection, getAlbumsFromCollection } from './albumManager.js';
 
 export function registerIpcHandlers() {
 
@@ -20,16 +20,6 @@ export function registerIpcHandlers() {
         } catch (error) {
             console.error('Error adding album:', error);
             return { success: false, error: error.message };
-        }
-    });
-
-    ipcMain.handle('get-random-album', async () => {
-        try {
-            const randomAlbum = await getRandomAlbum();
-            return randomAlbum;
-        } catch (error) {
-            console.error('Error getting random album:', error);
-            return null;
         }
     });
 }

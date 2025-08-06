@@ -8,15 +8,22 @@
 </head>
 <body>
     <div class="rotating-container">
+        <img class="cover way-left" id="wayLeftCover">
         <img class="cover left" id="leftCover">
         <img class="cover center" id="centerCover">
         <img class="cover right" id="rightCover">
+        <img class="cover way-right" id="wayRightCover">
     </div>
-    <div>
-        <h1 id="albumTitle">Album Title</h1>
-        <h2 id="artistName">Artist Name</h2>
-        <p id="year">Year</p>
+    <div class="album-info-container">
+        <button id="addAlbumButtom" class="add-icon left-button"><span>&#43;</span></button>
+        <div class="album-info">
+            <h1 id="albumTitle">Album Title</h1>
+            <h2 id="artistName">Artist Name</h2>
+            <p id="year">Year</p>
+        </div>
+        <button id="shuffleButton" class="shuffle-icon right-button"></button>
     </div>
+
     <script src="renderer.js"></script>
 </body>
 </html>

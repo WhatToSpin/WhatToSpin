@@ -83,16 +83,6 @@ async function saveAlbumCover(album, artist, cover) {
     return coverPath;
 }
 
-
-async function getRandomAlbum() {
-    const albums = await getAlbumsFromCollection();
-    if (albums.length === 0) {
-        return null;
-    }
-    const randomIndex = getRandomIndex(albums.length);
-    return albums[randomIndex];
-}
-
 async function getAlbumsFromCollection() {
     try {
         const collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
@@ -104,12 +94,7 @@ async function getAlbumsFromCollection() {
     }
 }
 
-function getRandomIndex(length) {
-    return Math.floor(Math.random() * length);
-}
-
 export {
     addAlbumToCollection,
-    getRandomAlbum,
     getAlbumsFromCollection
 };
