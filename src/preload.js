@@ -5,7 +5,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     addAlbumToCollection: (albumsData) => ipcRenderer.invoke('add-album', albumsData),
 
-    openPopup: () => ipcRenderer.invoke('open-popup'),
-
-    debug: (message) => ipcRenderer.invoke('debug', message),
+    openPopup: () => ipcRenderer.invoke('open-popup')
 });

@@ -130,7 +130,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addAlbumButton.addEventListener('click', async () => {
         try {
-            window.electronAPI.debug('Opening add album popup...');
             await window.electronAPI.openPopup();
         } catch (error) {
             console.error('Error adding album:', error);

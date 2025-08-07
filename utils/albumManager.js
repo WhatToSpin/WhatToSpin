@@ -97,7 +97,7 @@ async function getAlbumCover(album, artist) {
 
 async function saveAlbumCover(album, artist, cover) {
 
-    const coverDir = path.join(__dirname, 'covers');
+    const coverDir = path.join(__dirname, 'src', 'covers');
 
     const coverUrl = cover['#text'];
     const filename = `${artist.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${album.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;

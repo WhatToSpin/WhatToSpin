@@ -16,9 +16,10 @@ async function loadModules() {
 async function createWindow() {
     const window = new BrowserWindow({
         width: 600,
-        height: 400,
+        height: 350,
         show: false,
         resizable: false,
+        titleBarStyle: 'customButtonsOnHover',
         webPreferences: {
             contextIsolation: true,
             enableRemoteModule: false,
