@@ -27,7 +27,7 @@ export function registerIpcHandlers() {
         }
     });
 
-    ipcMain.handle('open-popup', async (event) => {
+    ipcMain.handle('open-add-album-popup', async (event) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         
         const [mainX, mainY] = mainWindow.getPosition();
@@ -55,8 +55,45 @@ export function registerIpcHandlers() {
             }
         });
 
-        popupWindow.loadFile('src/popup.html');
+        popupWindow.loadFile('src/addAlbumPopup.html');
 
+        popupWindow.on('closed', () => {
+            popupWindow = null;
+        });
+    });
+
+    ipcMain.handle('open-album-focus-popup', async (event, albumData) => {
+        const mainWindow = BrowserWindow.fromWebContents(event.sender);
+
+        const [mainX, mainY] = mainWindow.getPosition();
+        const [mainWidth, mainHeight] = mainWindow.getSize();
+
+        const popupWidth = 300;
+        const popupHeight = 400;
+        const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
+        const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
+
+        const popupWindow = new BrowserWindow({
+            width: popupWidth,
+            height: popupHeight,
+            x: popupX,
+            y: popupY,
+            resizable: false,
+            movable: false,
+            frame: false,
+            parent: mainWindow,
+            modal: true,
+            webPreferences: {
+                contextIsolation: true,
+                enableRemoteModule: false,
+                preload: path.join(__dirname, '../src/preload.js')
+            }
+        });
+
+        popupWindow.loadFile('src/albumFocusPopup.html', {
+            query: { albumData: JSON.stringify(albumData) }
+        });
+        
         popupWindow.on('closed', () => {
             popupWindow = null;
         });

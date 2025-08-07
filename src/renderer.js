@@ -130,10 +130,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addAlbumButton.addEventListener('click', async () => {
         try {
-            await window.electronAPI.openPopup();
+            await window.electronAPI.openAddAlbumPopup();
         } catch (error) {
             console.error('Error adding album:', error);
             alert('Failed to add album. Please try again.');
+        }
+    });
+
+    centerCover.addEventListener('click', async () => {
+        if (albums.length === 0) return;
+        try {
+            await window.electronAPI.openAlbumFocusPopup(albums[currentIndex]);
+        } catch (error) {
+            console.error('Error opening album focus popup:', error);
+            alert('Failed to open album focus popup. Please try again.');
         }
     });
 
