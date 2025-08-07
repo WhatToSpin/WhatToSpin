@@ -27,7 +27,7 @@ export function registerIpcHandlers() {
         }
     });
 
-    ipcMain.handle('open-add-album-popup', async (event) => {
+    ipcMain.handle('open-add-album-popup', async (event, currentAlbumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         
         const [mainX, mainY] = mainWindow.getPosition();
@@ -55,7 +55,10 @@ export function registerIpcHandlers() {
             }
         });
 
-        popupWindow.loadFile('src/addAlbumPopup.html');
+        const encodedColor = encodeURIComponent(currentAlbumCoverColor || '#cfcfcf');
+        popupWindow.loadFile('src/addAlbumPopup.html', { 
+            query: { currentAlbumCoverColor: encodedColor } 
+        });
 
         popupWindow.on('closed', () => {
             popupWindow = null;

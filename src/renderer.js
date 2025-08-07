@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let albums = [];
     let currentIndex = 0;
+    let currentAlbumCoverColor = '#cfcfcf'; // for 'add' button 
     
     try {
         albums = await window.electronAPI.getAlbums();        
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateCoverImages();
     }
 
-    function updateCoverImages() {
+    async function updateCoverImages() {
         if (albums.length === 0) return;
 
         const wayLeftIndex = (currentIndex - 2 + albums.length) % albums.length;
@@ -69,6 +70,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(centerCover, albums[currentIndex]);
         setCoverImage(rightCover, albums[rightIndex]);
         setCoverImage(wayRightCover, albums[wayRightIndex]);
+
+        setCoverColor(albums[currentIndex].cover);
     }
 
     function setCoverImage(imgElement, album) {
@@ -106,6 +109,76 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }   
 
+    async function setCoverColor(albumCover) {
+        if (!albumCover) {
+            return;
+        }
+
+        const coverFileName = albumCover.split('/').pop();
+        const relativeCoverPath = `covers/${coverFileName}`;
+
+        const img = new Image();
+        img.src = relativeCoverPath;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        img.onload = async () => {
+            try {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                const colorsCounts = {};
+
+                // sample every 4th pixel
+                const sampleRate = 4;
+                for (let i = 0; i < pixels.length; i += 4 * sampleRate) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    const alpha = pixels[i + 3];
+                    
+                    if (alpha < 128) continue;
+                    
+                    // skip very light and dark colors
+                    const brightness = (r + g + b) / 3;
+                    if (brightness < 30 || brightness > 225) continue;
+                    
+                    const quantizeLevel = 32;
+                    const qR = Math.floor(r / quantizeLevel) * quantizeLevel;
+                    const qG = Math.floor(g / quantizeLevel) * quantizeLevel;
+                    const qB = Math.floor(b / quantizeLevel) * quantizeLevel;
+                    
+                    const colorKey = `${qR},${qG},${qB}`;
+                    colorsCounts[colorKey] = (colorsCounts[colorKey] || 0) + 1;
+                }
+
+                let maxCount = 0;
+                let dominantColor = '#cfcfcf';
+
+                for (const colorKey in colorsCounts) {
+                    if (colorsCounts[colorKey] > maxCount) {
+                        maxCount = colorsCounts[colorKey];
+                        const [r, g, b] = colorKey.split(',').map(Number);
+                        dominantColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+                    }
+                }
+
+                currentAlbumCoverColor = dominantColor;
+            } catch (error) {
+                console.error('Error processing image for color extraction:', error);
+                currentAlbumCoverColor = '#cfcfcf';
+            }
+        };
+
+        img.onerror = () => {
+            console.error('Failed to load image for color extraction:', relativeCoverPath);
+            currentAlbumCoverColor = '#cfcfcf';
+        };
+    }
+
     shuffleButton.addEventListener('click', () => {
         if (albums.length === 0) return;
         shuffleAlbums();
@@ -130,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addAlbumButton.addEventListener('click', async () => {
         try {
-            await window.electronAPI.openAddAlbumPopup();
+            await window.electronAPI.openAddAlbumPopup(currentAlbumCoverColor);
         } catch (error) {
             console.error('Error adding album:', error);
             alert('Failed to add album. Please try again.');

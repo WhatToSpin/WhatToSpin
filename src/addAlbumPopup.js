@@ -1,5 +1,27 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentAlbumCoverColor = urlParams.get('currentAlbumCoverColor');
+    
+    if (currentAlbumCoverColor) {
+        currentAlbumCoverColor = decodeURIComponent(currentAlbumCoverColor);
+    }
+
     const submitAlbumButton = document.getElementById('submit-button');
+    submitAlbumButton.style.setProperty('font-weight', '600', 'important');
+    
+    if (currentAlbumCoverColor) {
+        submitAlbumButton.style.setProperty('background-color', currentAlbumCoverColor, 'important');
+        
+        // set text color 
+        const color = currentAlbumCoverColor.replace('#', '');        
+        const r = parseInt(color.substr(0, 2), 16);
+        const g = parseInt(color.substr(2, 2), 16);
+        const b = parseInt(color.substr(4, 2), 16);
+                
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
+        submitAlbumButton.style.setProperty('color', textColor, 'important');
+    }
 
     // close window with escape key
     document.addEventListener('keydown', (event) => {
