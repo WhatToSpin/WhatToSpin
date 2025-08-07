@@ -27,6 +27,14 @@ export function registerIpcHandlers() {
         }
     });
 
+    ipcMain.handle('notify-album-added', async (event, albumData) => {
+        const addAlbumPopup = BrowserWindow.fromWebContents(event.sender);
+        const mainWindow = addAlbumPopup.getParentWindow();
+
+        mainWindow.webContents.send('album-was-added', albumData);
+        return { success: true };
+    });
+
     ipcMain.handle('open-add-album-popup', async (event, currentAlbumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         

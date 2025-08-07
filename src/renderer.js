@@ -240,6 +240,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDisplay();
     });
 
+     window.electronAPI.onAlbumAdded(async (albumData) => {
+        // refresh album list
+        albums = await window.electronAPI.getAlbums();      
+        
+        // get new album index
+        currentIndex = albums.findIndex(album => 
+            album.album === albumData.album &&
+            album.artist === albumData.artist
+        );
+        updateDisplay();
+    })
+
     updateDisplay();
 });
 

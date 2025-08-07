@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await window.electronAPI.addAlbumToCollection(albumData);
             
             if (result && result.success) {
+                await window.electronAPI.notifyAlbumAdded(albumData);
                 window.close(); // close the popup after adding the album
             } else {
                 alert(`Error adding album: ${result ? result.error : 'Unknown error'}`);
