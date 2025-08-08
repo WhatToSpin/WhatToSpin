@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { addAlbumToCollection, getAlbumsFromCollection } from './albumManager.js';
+import { addAlbumToCollection, getAlbumsFromCollection, deleteAlbumFromCollection, updateAlbumInCollection } from './albumManager.js';
 import { BrowserWindow } from 'electron';
 import path from 'path';
 
@@ -9,20 +9,45 @@ export function registerIpcHandlers() {
 
     ipcMain.handle('get-albums', async () => {
         try {
-            const albums = await getAlbumsFromCollection();
-            return albums;
+            const collection = await getAlbumsFromCollection();
+            return collection;
         } catch (error) {
             console.error('Error getting albums:', error);
             return [];
         }
     });
 
-    ipcMain.handle('add-album', async (event, albumsData) => {
+    ipcMain.handle('add-album', async (event, albumData) => {
         try {
-            await addAlbumToCollection(albumsData.album, albumsData.artist, albumsData.year);
-            return { success: true };
+            const result = await addAlbumToCollection(albumData);
+            if (result && result.success) {
+                return { success: true };
+            } else {
+                return { success: false, error: result ? result.error : 'Unknown error' };
+            }
         } catch (error) {
             console.error('Error adding album:', error);
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle('delete-album', async (event, albumData) => {
+        try {
+            await deleteAlbumFromCollection(albumData);
+            return { success: true };
+        } catch (error) {
+            console.error('Error deleting album:', error);
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle('update-album', async (event, albumDataString, updatedAlbumData) => {
+        try {
+
+            await updateAlbumInCollection(albumDataString, updatedAlbumData);
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating album:', error);
             return { success: false, error: error.message };
         }
     });
@@ -39,6 +64,7 @@ export function registerIpcHandlers() {
         console.log(message);
         return { success: true };
     });
+
     ipcMain.handle('open-add-album-popup', async (event, currentAlbumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         
@@ -107,6 +133,43 @@ export function registerIpcHandlers() {
 
         popupWindow.loadFile('src/albumFocusPopup.html', {
             query: { albumData: JSON.stringify(albumData) }
+        });
+        
+        popupWindow.on('closed', () => {
+            popupWindow = null;
+        });
+    });
+
+    ipcMain.handle('open-edit-album-popup', async (event, albumData) => {
+        const mainWindow = BrowserWindow.fromWebContents(event.sender);
+
+        const [mainX, mainY] = mainWindow.getPosition();
+        const [mainWidth, mainHeight] = mainWindow.getSize();
+
+        const popupWidth = 300;
+        const popupHeight = 400;
+        const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
+        const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
+
+        const popupWindow = new BrowserWindow({
+            width: popupWidth,
+            height: popupHeight,
+            x: popupX,
+            y: popupY,
+            resizable: false,
+            movable: false,
+            frame: false,
+            parent: mainWindow,
+            modal: true,
+            webPreferences: {
+                contextIsolation: true,
+                enableRemoteModule: false,
+                preload: path.join(__dirname, '../src/preload.js')
+            }
+        });
+
+        popupWindow.loadFile('src/editAlbumPopup.html', {
+            query: { albumData: albumData }
         });
         
         popupWindow.on('closed', () => {

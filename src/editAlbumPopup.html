@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<style>
+    body {
+        margin: 0;
+        padding: 15px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        height: 100vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .close {
+        text-align: center; 
+        font-size: 12px; 
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .edit-cover {
+        transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+        width: 160px;
+        height: 160px;
+        background-color: #ddd;
+        display: block;
+        margin: 0 auto 10px auto;
+        color: #666;
+        object-fit: cover; 
+        overflow: hidden;
+        filter: drop-shadow(0 8px 3px rgba(0, 0, 0, 0.3));
+    }
+
+    .edit-album-info-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        min-height: 60px;
+    }
+
+    .edit-info {
+        text-align: center;
+        margin: 5px 20px;
+        max-width: 400px;
+        overflow: hidden;
+    }
+
+    .control-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .control-buttons button {
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px 0;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .control-buttons button.save {
+        background-color: #4CAF50;
+    }
+
+    .control-buttons button.delete {
+        background-color: #dc3545;
+    }
+
+    h1 {
+        color: #333;
+        padding: 2px;
+        border: 1px solid #ccc;
+        font-size: 18px;
+        margin: 5px 0 3px;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    h2 {
+        color: #666;
+        padding: 2px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        margin: 5px 0;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    p {
+        color: #888;
+        padding: 2px;
+        border: 1px solid #ccc;
+        font-size: 12px;
+        font-weight: bold;
+        margin: 5px 0;
+        transition: opacity 0.3s ease;
+    }
+
+</style>
+<body>
+    <div class="close">Press 'Escape' to cancel</div>
+    <div>
+        <img class="edit-cover" id="editCover">
+        <div class="edit-album-info-container" id="editInfo">
+            <div class="edit-info">
+                <h1 contenteditable="true" id="editAlbumTitle">Album Title</h1>
+                <h2 contenteditable="true" id="editArtistName">Artist Name</h2>
+                <p contenteditable="true" id="editYear">Year</p>
+            </div>
+            <div class="control-buttons">
+                <button class="save" id="saveChanges">Save</button>
+                <button class="delete" id="deleteAlbum">Delete</button>
+            </div>  
+        </div>
+    </div>
+    <script src="editAlbumPopup.js"></script>
+</body>

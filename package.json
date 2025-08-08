@@ -4,7 +4,8 @@
   "type": "module",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "clear": "rm -rf src/covers src/collection.json"
   },
   "keywords": [],
   "author": "",

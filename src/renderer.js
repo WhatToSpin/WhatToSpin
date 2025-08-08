@@ -18,7 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentAlbumCoverColor = '#cfcfcf'; // for 'add' button 
     
     try {
-        albums = await window.electronAPI.getAlbums();    
+        // test when this is rerun next...
+        collection = await window.electronAPI.getAlbumsFromCollection();
+        albums = collection.albums;    
         currentIndex = getRandomIndex(albums.length); // start with a random album
         updateDisplay();
     } catch (error) {
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateDisplay() {
         if (albums.length === 0) {
             albumTitle.textContent = 'No albums found';
-            artistName.textContent = 'Add some albums to get started';
+            artistName.textContent = '';
             
             year.textContent = '';
             
@@ -314,19 +316,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // listen for an album added
     window.electronAPI.onAlbumAdded(async (albumData) => {
-        albums = await window.electronAPI.getAlbums(); // refresh album list   
-        window.electronAPI.debug(`Album added: ${albumData.album} by ${albumData.artist}`); 
+
+        // refresh album list
+        collection = await window.electronAPI.getAlbumsFromCollection();
+        albums = collection.albums;
+
         // get new album index
         currentIndex = albums.findIndex(album => 
             album.album === albumData.album &&
             album.artist === albumData.artist
         );
-        updateDisplay();
-    })
 
-    updateDisplay();
+        updateDisplay();
+    });
 });
 
 function getRandomIndex(length) {
     return Math.floor(Math.random() * length);
-}
+};

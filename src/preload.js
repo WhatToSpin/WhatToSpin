@@ -1,13 +1,19 @@
 const { contextBridge, ipcRenderer, shell } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    getAlbums: () => ipcRenderer.invoke('get-albums'),
+    getAlbumsFromCollection: () => ipcRenderer.invoke('get-albums'),
 
-    addAlbumToCollection: (albumsData) => ipcRenderer.invoke('add-album', albumsData),
+    addAlbumToCollection: (albumData) => ipcRenderer.invoke('add-album', albumData),
+
+    deleteAlbumFromCollection: (albumData) => ipcRenderer.invoke('delete-album', albumData),
+
+    updateAlbumInCollection: (albumDataString, updatedAlbumData) => ipcRenderer.invoke('update-album', albumDataString, updatedAlbumData),
 
     openAddAlbumPopup: (currentAlbumCoverColor) => ipcRenderer.invoke('open-add-album-popup', currentAlbumCoverColor),
 
     openAlbumFocusPopup: (albumData) => ipcRenderer.invoke('open-album-focus-popup', albumData),
+
+    openEditAlbumPopup: (albumData) => ipcRenderer.invoke('open-edit-album-popup', albumData),
 
     notifyAlbumAdded: (albumData) => ipcRenderer.invoke('notify-album-added', albumData),
 

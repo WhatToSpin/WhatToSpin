@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error parsing album data:', error);
             document.getElementById('focusedAlbumTitle').textContent = 'Unknown Album';
             document.getElementById('focusedArtistName').textContent = 'Unknown Artist';
-            document.getElementById('focusedYear').textContent = 'Unknown Year';
+            document.getElementById('focusedYear').textContent = '';
             document.getElementById('focusedCover').src = 'covers/unknown.png';
         }
     }
@@ -47,8 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     options.addEventListener('click', () => {
-        window.electronAPI.debug("Options menu clicked");
         dropdownContent.classList.toggle('show');
+    });
+
+    editLink.addEventListener('click', () => {
+        window.electronAPI.openEditAlbumPopup(albumDataString);
+        dropdownContent.classList.remove('show');
     });
 
     window.onclick = function(event) {

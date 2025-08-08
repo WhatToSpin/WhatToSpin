@@ -7,92 +7,149 @@ import albumArt from 'album-art';
 dotenv.config();
 const __dirname = path.resolve();
 const COLLECTION_PATH = path.join(__dirname, 'src', 'collection.json');
+const UNKNOWN_COVER_PATH = path.join(__dirname, 'src', 'covers', 'unknown.png');
 
-async function addAlbumToCollection(album, artist, year) {
-    // make sure collection.json exists
+async function getAlbumsFromCollection() {
     let collection;
     try {
-        const fileContent = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
-        if (fileContent.trim() === '') {
-            throw new Error('File is empty');
-        }
-        collection = JSON.parse(fileContent);
-    } catch (err) {
+        collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
+        collection = JSON.parse(collection);
+    } catch (error) {
+        console.log('making collection.json');
         collection = { albums: [] };
         await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
     }
+    return collection;
+}
 
-
-
-    // make sure album does not already exist
-    const existingAlbum = collection.albums.find(
-        (a) => a.album === album && a.artist === artist
-    );
-    if (existingAlbum) {
-        throw new Error('Album already exists in the collection');
-    }
-
-    let coverPath = await getAlbumCover(album, artist);
-    if (!coverPath) {
-        coverPath = path.join(__dirname, 'src', 'covers', 'unknown.png');
-    }
-
-    const newAlbum = {
-        album: album,
-        artist: artist,
-        year: year,
-        cover: coverPath,
-    };
-
-    collection.albums.push(newAlbum);
+async function sortCollection(collection) {
     collection.albums.sort((a, b) => {
         // remove "the" for sorting 
         const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
         const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
         return artistA.localeCompare(artistB) || a.year - b.year; // sort by artist, then year
     });
-
-    await fsPromises.writeFile(
-        COLLECTION_PATH,
-        JSON.stringify(collection, null, 2)
-    );
+    return collection;
 }
 
-async function getAlbumsFromCollection() {
+async function addAlbumToCollection(albumData) {
     try {
-        const collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
-        const albumsData = JSON.parse(collection).albums;
-        return albumsData;
+        let collection = await getAlbumsFromCollection();
+
+        // Validate and sanitize input data
+        if (!albumData || typeof albumData !== 'object') {
+            throw new Error('Invalid album data provided');
+        }
+
+        const album = String(albumData.album || '').trim();
+        const artist = String(albumData.artist || '').trim();
+        const year = albumData.year ? String(albumData.year).trim() : '';
+
+        // Validate required fields
+        if (!album || !artist) {
+            throw new Error('Album name and artist name are required');
+        }
+
+        // make sure album does not already exist
+        const albumsData = collection.albums;
+        if (albumsData.length !== 0) {
+            const existingAlbum = albumsData.find(
+                (a) => a.album === album && a.artist === artist
+            )
+            if (existingAlbum) {
+                throw new Error('Album already exists in the collection');
+            }
+        }
+
+        let coverPath = await getAlbumCover(album, artist);
+        if (!coverPath) {
+            coverPath = UNKNOWN_COVER_PATH;
+        }
+
+        const newAlbum = {
+            album: album,
+            artist: artist,
+            year: year,
+            cover: coverPath,
+        };
+
+        collection.albums.push(newAlbum);
+        collection = await sortCollection(collection);
+
+        await fsPromises.writeFile(
+            COLLECTION_PATH,
+            JSON.stringify(collection, null, 2)
+        );
+
+        return { success: true  };
+
     } catch (error) {
-        console.error('Error loading albums:', error);
-        return [];
+        console.error('Error adding album:', error);
+        return { success: false, error: error.message };
     }
 }
 
 async function getAlbumCover(album, artist) {
-    const coverUrl = await albumArt(artist, { album: album, size: 'large' });
-    if (!coverUrl) {
+    if (!album || !artist) {
         return null;
     }
 
-    // checking cover;
-    const response = await fetch(coverUrl);
-    if (!response.ok) {
+    // Ensure album and artist are strings
+    if (typeof album !== 'string') {
+        console.log('Album name is not a string, converting to string');
+        album = String(album);
+    }
+    if (typeof artist !== 'string') {
+        console.log('Artist name is not a string, converting to string');
+        artist = String(artist);
+    }
+
+    // Validate that we have non-empty strings after conversion
+    if (!album.trim() || !artist.trim()) {
+        console.log('Album or artist is empty after string conversion');
         return null;
     }
 
-    const cover = { '#text': coverUrl };
-    const coverPath = await saveAlbumCover(album, artist, cover);
+    try {
+        const coverUrl = await albumArt(artist, { album: album, size: 'large' });
+        if (!coverUrl) {
+            return null;
+        }
 
-    return coverPath;
+        // checking cover;
+        const response = await fetch(coverUrl);
+        if (!response.ok) {
+            return null;
+        }
+
+        const cover = { '#text': coverUrl };
+        const coverPath = await saveAlbumCover(album, artist, cover);
+
+        return coverPath;
+    } catch (error) {
+        console.error(`Error fetching album cover for "${album}" by "${artist}":`, error.message);
+        return null;
+    }
 }
 
 async function saveAlbumCover(album, artist, cover) {
+    // Validate inputs
+    if (!album || !artist || !cover || !cover['#text']) {
+        throw new Error('Invalid parameters for saveAlbumCover');
+    }
+
+    // Ensure album and artist are strings and sanitize them for filename
+    const albumSafe = String(album).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const artistSafe = String(artist).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    
+    if (!albumSafe || !artistSafe) {
+        throw new Error('Album and artist names cannot be empty after sanitization');
+    }
 
     const coverDir = path.join(__dirname, 'src', 'covers');
 
     const coverUrl = cover['#text'];
-    const filename = `${artist.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${album.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+    const filename = `${artistSafe}_${albumSafe}.png`;
     const coverPath = path.join(coverDir, filename);
 
     if (!fs.existsSync(coverDir)) {
@@ -110,7 +167,74 @@ async function saveAlbumCover(album, artist, cover) {
     return coverPath;
 }
 
+async function deleteAlbumFromCollection(albumData) {
+
+    const album = albumData.album;
+    const artist = albumData.artist;
+    const coverPath = albumData.cover;
+
+    // make sure collection.json exists
+    let collection = await getAlbumsFromCollection();
+
+    // delete album from the collection
+    const albumIndex = collection.albums.findIndex(
+        (a) => a.album === album && a.artist === artist
+    );
+    if (albumIndex === -1) {
+        throw new Error('Album not found in the collection');
+    }
+    collection.albums.splice(albumIndex, 1);
+
+    // delete the cover image
+    if (coverPath && fs.existsSync(coverPath) && coverPath !== UNKNOWN_COVER_PATH) {
+        fs.unlinkSync(coverPath);
+    }
+    
+    // write updated collection
+    await fsPromises.writeFile(
+        COLLECTION_PATH,
+        JSON.stringify(collection, null, 2)
+    );
+
+    return { success: true };
+}
+
+async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
+    
+    let collection = await getAlbumsFromCollection();
+
+    const albumIndex = collection.albums.findIndex(
+        (a) => a.album === oldAlbumData.album && a.artist === oldAlbumData.artist
+    );
+    if (albumIndex === -1) {
+        throw new Error('Album not found in the collection');
+    }
+
+    // handle cover image bs
+
+    // update album metadata
+    collection.albums[albumIndex] = {
+        album: newAlbumData.album,
+        artist: newAlbumData.artist,
+        year: newAlbumData.year,
+        cover: oldAlbumData.cover // keep the same cover for now
+    }
+
+    if (oldAlbumData.artist !== newAlbumData.artist || oldAlbumData.year !== newAlbumData.year) {
+        collection = await sortCollection(collection);
+    }
+
+    await fsPromises.writeFile(
+        COLLECTION_PATH,
+        JSON.stringify(collection, null, 2)
+    );
+
+    return { success: true };
+}
+
 export {
     addAlbumToCollection,
-    getAlbumsFromCollection
+    getAlbumsFromCollection, 
+    deleteAlbumFromCollection,
+    updateAlbumInCollection
 };
