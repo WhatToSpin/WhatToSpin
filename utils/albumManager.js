@@ -210,7 +210,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
         throw new Error('Album not found in the collection');
     }
 
-    // handle cover image bs
+    // handle cover images
 
     // update album metadata
     collection.albums[albumIndex] = {
@@ -224,6 +224,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
         collection = await sortCollection(collection);
     }
 
+    // rewrite to collection.json
     await fsPromises.writeFile(
         COLLECTION_PATH,
         JSON.stringify(collection, null, 2)

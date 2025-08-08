@@ -6,10 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownContent = document.getElementById('dropdownContent');
     const editLink = document.getElementById('edit');
     
+    let albumData = null; 
     if (albumDataString) {
-        try {
-            const albumData = JSON.parse(albumDataString);
-            
+        albumData = JSON.parse(albumDataString);
+        setFocusedAlbum(albumData);
+    }
+
+    function setFocusedAlbum(albumData) {
+        try {            
             document.getElementById('focusedAlbumTitle').textContent = albumData.album;
             document.getElementById('focusedArtistName').textContent = albumData.artist;
             document.getElementById('focusedYear').textContent = albumData.year;
@@ -45,13 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
     options.addEventListener('click', () => {
         dropdownContent.classList.toggle('show');
     });
 
     editLink.addEventListener('click', () => {
-        window.electronAPI.openEditAlbumPopup(albumDataString);
+        window.electronAPI.openEditAlbumPopup(albumData); // Pass the parsed object, not the string
         dropdownContent.classList.remove('show');
     });
 
@@ -60,4 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdownContent.classList.remove('show');
         }
     }
+
+    // listen for an album updated
+    window.electronAPI.onAlbumUpdated(async (albumData) => {
+
+        // set focused album with new data
+        setFocusedAlbum(albumData);
+
+        // notify the main window of an album change (reuse notifyAlbumAded)
+        await window.electronAPI.notifyAlbumAdded(albumData);
+    });
 });

@@ -60,6 +60,14 @@ export function registerIpcHandlers() {
         return { success: true };
     });
 
+    ipcMain.handle('notify-album-update', async (event, albumData) => {
+        const editAlbumPopup = BrowserWindow.fromWebContents(event.sender);
+        const albumFocus = editAlbumPopup.getParentWindow();
+
+        albumFocus.webContents.send('album-was-updated', albumData);
+        return { success: true };
+    });
+
     ipcMain.handle('debug', (event, message) => {
         console.log(message);
         return { success: true };
@@ -141,7 +149,8 @@ export function registerIpcHandlers() {
     });
 
     ipcMain.handle('open-edit-album-popup', async (event, albumData) => {
-        const mainWindow = BrowserWindow.fromWebContents(event.sender);
+        const albumFocusWindow = BrowserWindow.fromWebContents(event.sender);
+        const mainWindow = albumFocusWindow.getParentWindow();
 
         const [mainX, mainY] = mainWindow.getPosition();
         const [mainWidth, mainHeight] = mainWindow.getSize();
@@ -159,7 +168,7 @@ export function registerIpcHandlers() {
             resizable: false,
             movable: false,
             frame: false,
-            parent: mainWindow,
+            parent: albumFocusWindow,
             modal: true,
             webPreferences: {
                 contextIsolation: true,
@@ -169,9 +178,9 @@ export function registerIpcHandlers() {
         });
 
         popupWindow.loadFile('src/editAlbumPopup.html', {
-            query: { albumData: albumData }
+            query: { albumData: JSON.stringify(albumData) }
         });
-        
+
         popupWindow.on('closed', () => {
             popupWindow = null;
         });
