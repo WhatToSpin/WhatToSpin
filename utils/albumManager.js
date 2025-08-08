@@ -93,7 +93,7 @@ async function getAlbumCover(album, artist) {
         return null;
     }
 
-    // Ensure album and artist are strings
+    // album and artist should be strings
     if (typeof album !== 'string') {
         console.log('Album name is not a string, converting to string');
         album = String(album);
@@ -103,7 +103,7 @@ async function getAlbumCover(album, artist) {
         artist = String(artist);
     }
 
-    // Validate that we have non-empty strings after conversion
+    // validate non-empty strings after conversion
     if (!album.trim() || !artist.trim()) {
         console.log('Album or artist is empty after string conversion');
         return null;
@@ -132,14 +132,14 @@ async function getAlbumCover(album, artist) {
 }
 
 async function saveAlbumCover(album, artist, cover) {
-    // Validate inputs
     if (!album || !artist || !cover || !cover['#text']) {
         throw new Error('Invalid parameters for saveAlbumCover');
     }
 
-    // Ensure album and artist are strings and sanitize them for filename
+    // sanatize for filename
     const albumSafe = String(album).replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const artistSafe = String(artist).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const randomId = Math.floor(Math.random() * 1000000).toString();
     
     if (!albumSafe || !artistSafe) {
         throw new Error('Album and artist names cannot be empty after sanitization');
@@ -148,7 +148,7 @@ async function saveAlbumCover(album, artist, cover) {
     const coverDir = path.join(__dirname, 'src', 'covers');
 
     const coverUrl = cover['#text'];
-    const filename = `${artistSafe}_${albumSafe}.png`;
+    const filename = `${artistSafe}_${albumSafe}_${randomId}.png`;
     const coverPath = path.join(coverDir, filename);
 
     if (!fs.existsSync(coverDir)) {
