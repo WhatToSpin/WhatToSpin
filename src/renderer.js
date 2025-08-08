@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             wayRightCover.src = '';
 
             hideCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
+            currentAlbumCoverColor = '#cfcfcf'; // reset cover color
 
             return;
         }
@@ -58,6 +59,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             setCoverImage(centerCover, current); // only set center cover
+            setCoverColor(current.cover);
+
+            return;
         }
 
         if (albums.length === 2) {
@@ -72,6 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             setCoverImage(centerCover, current);
             setCoverImage(rightCover, albums[(currentIndex + 1) % 2]);
             setCoverColor(current.cover);
+
+            return;
         }
 
         if (albums.length === 3 || albums.length === 4) {
@@ -84,6 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
 
             updateThreeCoverImages();
+
+            return;
         }
         
         if (albums.length >= 5) {
@@ -99,11 +107,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             updateFiveCoverImages();
+            
+            return;
         }
-
-        currentIndex = currentIndex % albums.length; // ensure valid index
-
-        return;
     }
 
     function showCovers(covers) {
