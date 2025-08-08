@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const albumDataString = urlParams.get('albumData');
+    const albumCoverColor = decodeURIComponent(urlParams.get('albumCoverColor'));
 
     const options = document.getElementById('options');
     const dropdownContent = document.getElementById('dropdownContent');
@@ -43,18 +44,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // close behavior
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             window.close();
         }
     });
 
+    // dropdown menu behavior
     options.addEventListener('click', () => {
         dropdownContent.classList.toggle('show');
     });
 
     editLink.addEventListener('click', () => {
-        window.electronAPI.openEditAlbumPopup(albumData); // Pass the parsed object, not the string
+        window.electronAPI.openEditAlbumPopup(albumData, albumCoverColor);
         dropdownContent.classList.remove('show');
     });
 

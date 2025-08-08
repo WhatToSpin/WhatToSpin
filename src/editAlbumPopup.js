@@ -1,6 +1,30 @@
+const urlParams = new URLSearchParams(window.location.search);
+const albumCoverColor = decodeURIComponent(urlParams.get('albumCoverColor'));  
+
+if (albumCoverColor) {
+    const style = document.createElement('style');
+    
+    const color = albumCoverColor.replace('#', '');        
+    const r = parseInt(color.slice(0, 2), 16);
+    const g = parseInt(color.slice(2, 4), 16);
+    const b = parseInt(color.slice(4, 6), 16);
+            
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
+    
+    style.innerHTML = `
+        #saveChanges {
+            background-color: ${albumCoverColor} !important;
+            color: ${textColor} !important;
+            font-weight: bold !important;
+        }
+    `;
+    
+    document.head.appendChild(style);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const oldAlbumDataString = urlParams.get('albumData');    
+    const oldAlbumDataString = urlParams.get('albumData');  
 
     const saveButton = document.getElementById('saveChanges');
     const deleteButton = document.getElementById('deleteAlbum');

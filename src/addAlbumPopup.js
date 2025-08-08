@@ -23,13 +23,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         submitAlbumButton.style.setProperty('color', textColor, 'important');
     }
 
-    // close window with escape key
+    // close behavior
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             event.preventDefault();
             window.close();
         }
     });
+
     window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             event.preventDefault();

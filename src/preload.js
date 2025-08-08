@@ -11,9 +11,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     openAddAlbumPopup: (currentAlbumCoverColor) => ipcRenderer.invoke('open-add-album-popup', currentAlbumCoverColor),
 
-    openAlbumFocusPopup: (albumData) => ipcRenderer.invoke('open-album-focus-popup', albumData),
+    openAlbumFocusPopup: (albumData, albumCoverColor) => ipcRenderer.invoke('open-album-focus-popup', albumData, albumCoverColor),
 
-    openEditAlbumPopup: (albumData) => ipcRenderer.invoke('open-edit-album-popup', albumData),
+    openEditAlbumPopup: (albumData, albumCoverColor) => ipcRenderer.invoke('open-edit-album-popup', albumData, albumCoverColor),
 
     notifyAlbumAdded: (albumData) => ipcRenderer.invoke('notify-album-added', albumData),
 

@@ -83,7 +83,7 @@ export function registerIpcHandlers() {
         const popupHeight = 300;
         const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
         const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
-        
+        3
         const popupWindow = new BrowserWindow({
             width: popupWidth,
             height: popupHeight,
@@ -111,7 +111,7 @@ export function registerIpcHandlers() {
         });
     });
 
-    ipcMain.handle('open-album-focus-popup', async (event, albumData) => {
+    ipcMain.handle('open-album-focus-popup', async (event, albumData, albumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
 
         const [mainX, mainY] = mainWindow.getPosition();
@@ -140,7 +140,10 @@ export function registerIpcHandlers() {
         });
 
         popupWindow.loadFile('src/albumFocusPopup.html', {
-            query: { albumData: JSON.stringify(albumData) }
+            query: { 
+                albumData: JSON.stringify(albumData), 
+                albumCoverColor: encodeURIComponent(albumCoverColor) 
+            }
         });
         
         popupWindow.on('closed', () => {
@@ -148,7 +151,7 @@ export function registerIpcHandlers() {
         });
     });
 
-    ipcMain.handle('open-edit-album-popup', async (event, albumData) => {
+    ipcMain.handle('open-edit-album-popup', async (event, albumData, albumCoverColor) => {
         const albumFocusWindow = BrowserWindow.fromWebContents(event.sender);
         const mainWindow = albumFocusWindow.getParentWindow();
 
@@ -178,7 +181,10 @@ export function registerIpcHandlers() {
         });
 
         popupWindow.loadFile('src/editAlbumPopup.html', {
-            query: { albumData: JSON.stringify(albumData) }
+            query: { 
+                albumData: JSON.stringify(albumData),
+                albumCoverColor: encodeURIComponent(albumCoverColor)
+            }
         });
 
         popupWindow.on('closed', () => {

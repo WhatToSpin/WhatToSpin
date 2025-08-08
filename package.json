@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "clear": "rm -rf src/covers src/collection.json"
+    "clear": "find src/covers/ -type f ! -name 'unknown.png' -delete && rm src/collection.json"
   },
   "keywords": [],
   "author": "",

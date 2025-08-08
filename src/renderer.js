@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     centerCover.addEventListener('click', async () => {
         if (albums.length === 0) return;
         try {
-            await window.electronAPI.openAlbumFocusPopup(albums[currentIndex]);
+            await window.electronAPI.openAlbumFocusPopup(albums[currentIndex], currentAlbumCoverColor);
         } catch (error) {
             console.error('Error opening album focus popup:', error);
             alert('Failed to open album focus popup. Please try again.');
