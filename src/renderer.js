@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     try {
         albums = await window.electronAPI.getAlbums();    
+        currentIndex = getRandomIndex(albums.length); // start with a random album
         updateDisplay();
     } catch (error) {
         console.error('Error loading albums:', error);
