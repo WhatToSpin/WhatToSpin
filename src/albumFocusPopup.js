@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const albumDataString = urlParams.get('albumData');
+
+    const options = document.getElementById('options');
+    const dropdownContent = document.getElementById('dropdownContent');
+    const editLink = document.getElementById('edit');
     
     if (albumDataString) {
         try {
@@ -40,4 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
             window.close();
         }
     });
+
+
+    options.addEventListener('click', () => {
+        window.electronAPI.debug("Options menu clicked");
+        dropdownContent.classList.toggle('show');
+    });
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.options')) {
+            dropdownContent.classList.remove('show');
+        }
+    }
 });

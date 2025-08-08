@@ -12,5 +12,8 @@
   "description": "",
   "devDependencies": {
     "electron": "^37.2.5"
+  },
+  "dependencies": {
+    "album-art": "^4.0.0"
   }
 }
