@@ -36,7 +36,6 @@ async function addAlbumToCollection(albumData) {
     try {
         let collection = await getAlbumsFromCollection();
 
-        // Validate and sanitize input data
         if (!albumData || typeof albumData !== 'object') {
             throw new Error('Invalid album data provided');
         }
@@ -45,7 +44,6 @@ async function addAlbumToCollection(albumData) {
         const artist = String(albumData.artist || '').trim();
         const year = albumData.year ? String(albumData.year).trim() : '';
 
-        // Validate required fields
         if (!album || !artist) {
             throw new Error('Album name and artist name are required');
         }
@@ -54,8 +52,9 @@ async function addAlbumToCollection(albumData) {
         const albumsData = collection.albums;
         if (albumsData.length !== 0) {
             const existingAlbum = albumsData.find(
-                (a) => a.album === album && a.artist === artist
-            )
+                (a) => a.album.toLowerCase() === album.toLowerCase() &&
+                a.artist.toLowerCase() === artist.toLowerCase()
+            );
             if (existingAlbum) {
                 throw new Error('Album already exists in the collection');
             }
@@ -175,6 +174,9 @@ async function deleteAlbumFromCollection(albumData) {
 
     // make sure collection.json exists
     let collection = await getAlbumsFromCollection();
+    if (!collection || !collection.albums) {
+        return { success: false, error: 'Collection is empty or does not exist' };
+    }
 
     // delete album from the collection
     const albumIndex = collection.albums.findIndex(

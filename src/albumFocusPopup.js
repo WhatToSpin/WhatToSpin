@@ -70,10 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // listen for an album updated
     window.electronAPI.onAlbumUpdated(async (albumData) => {
 
+        // notify the main window of an album change 
+        await window.electronAPI.notifyAlbumAdded(albumData);
+
+        if (!albumData) { // album was deleted
+            window.close();
+            return;
+        }
+
         // set focused album with new data
         setFocusedAlbum(albumData);
-
-        // notify the main window of an album change (reuse notifyAlbumAded)
-        await window.electronAPI.notifyAlbumAdded(albumData);
     });
 });

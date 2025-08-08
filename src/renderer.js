@@ -321,11 +321,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         collection = await window.electronAPI.getAlbumsFromCollection();
         albums = collection.albums;
 
-        // get new album index
-        currentIndex = albums.findIndex(album => 
-            album.album === albumData.album &&
-            album.artist === albumData.artist
-        );
+        if (!albumData) {
+            // album was delete -- reset index
+            currentIndex = getRandomIndex(albums.length);
+        } else {
+            // get new album index
+            currentIndex = albums.findIndex(album => 
+                album.album === albumData.album &&
+                album.artist === albumData.artist
+            );
+        }
 
         updateDisplay();
     });

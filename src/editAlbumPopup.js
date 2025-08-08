@@ -113,4 +113,21 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Failed to update album. Please try again. ${error.message}`);
         }
     });
+
+    deleteButton.addEventListener('click', async () => {
+        if (!oldAlbumDataString) {
+            alert('No album data to delete');
+            return;
+        }
+
+        const oldAlbumData = JSON.parse(oldAlbumDataString);
+        const result = await window.electronAPI.deleteAlbumFromCollection(oldAlbumData);
+
+        if (result && result.success) {
+            await window.electronAPI.notifyAlbumUpdated(null); // notify album was deleted
+            window.close(); // close the window after deletion
+        } else {
+            alert(`Error deleting album: ${result ? result.error : 'Unknown error'}`);
+        }
+    });
 });
