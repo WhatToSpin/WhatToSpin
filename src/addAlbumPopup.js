@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // set text color 
         const color = currentAlbumCoverColor.replace('#', '');        
-        const r = parseInt(color.substr(0, 2), 16);
-        const g = parseInt(color.substr(2, 2), 16);
-        const b = parseInt(color.substr(4, 2), 16);
+        const r = parseInt(color.slice(0, 2), 16);
+        const g = parseInt(color.slice(2, 4), 16);
+        const b = parseInt(color.slice(4, 6), 16);
                 
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
@@ -46,15 +46,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const artistName = document.getElementById('artist-name').value;
         const yearReleased = document.getElementById('year-released').value;
 
-        if (!albumName || !artistName || !yearReleased) {
-            alert('Please fill in all fields.');
+        if (!albumName || !artistName) {
+            alert('Please fill in the album and artist name');
             return;
         }
 
         const albumData = {
             album: albumName,
             artist: artistName,
-            year: yearReleased
+            year: yearReleased || ''
         };
 
         try {

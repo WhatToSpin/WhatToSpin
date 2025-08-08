@@ -22,6 +22,8 @@ async function addAlbumToCollection(album, artist, year) {
         await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
     }
 
+
+
     // make sure album does not already exist
     const existingAlbum = collection.albums.find(
         (a) => a.album === album && a.artist === artist
