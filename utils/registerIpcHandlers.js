@@ -35,6 +35,10 @@ export function registerIpcHandlers() {
         return { success: true };
     });
 
+    ipcMain.handle('debug', (event, message) => {
+        console.log(message);
+        return { success: true };
+    });
     ipcMain.handle('open-add-album-popup', async (event, currentAlbumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         

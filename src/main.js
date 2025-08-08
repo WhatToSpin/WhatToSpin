@@ -28,7 +28,6 @@ async function createWindow() {
     });
 
     await window.loadFile('src/index.html');
-    // window.webContents.openDevTools(); // debugging
     window.show();
 }
 

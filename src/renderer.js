@@ -18,27 +18,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentAlbumCoverColor = '#cfcfcf'; // for 'add' button 
     
     try {
-        albums = await window.electronAPI.getAlbums();        
-        if (albums.length > 0) {
-            currentIndex = getRandomIndex(albums.length);
-            const randomAlbum = albums[currentIndex];
-            if (randomAlbum) {
-                currentIndex = albums.findIndex(album => 
-                    album.album === randomAlbum.album && 
-                    album.artist === randomAlbum.artist
-                );
-                if (currentIndex === -1) currentIndex = 0;
-            }
-        }
+        albums = await window.electronAPI.getAlbums();    
+        updateDisplay();
     } catch (error) {
         console.error('Error loading albums:', error);
         albums = [];
+        updateDisplay();
     }
 
     function updateDisplay() {
         if (albums.length === 0) {
             albumTitle.textContent = 'No albums found';
             artistName.textContent = 'Add some albums to get started';
+            
             year.textContent = '';
             
             wayLeftCover.src = '';
@@ -46,18 +38,97 @@ document.addEventListener('DOMContentLoaded', async () => {
             centerCover.src = '';
             rightCover.src = '';
             wayRightCover.src = '';
+
+            hideCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
+
             return;
         }
+
+        if (albums.length === 1) {
+            showCovers([centerCover]);
+            hideCovers([wayLeftCover, leftCover, rightCover, wayRightCover]);
+
+            currentIndex = 0;
+            const current = albums[currentIndex];
+            albumTitle.textContent = current.album;
+            artistName.textContent = current.artist;
+            year.textContent = current.year;
+            
+            setCoverImage(centerCover, current); // only set center cover
+        }
+
+        if (albums.length === 2) {
+            showCovers([centerCover, rightCover]);
+            hideCovers([wayLeftCover, leftCover, wayRightCover]);
+
+            const current = albums[currentIndex];
+            albumTitle.textContent = current.album;
+            artistName.textContent = current.artist;
+            year.textContent = current.year;
+
+            setCoverImage(centerCover, current);
+            setCoverImage(rightCover, albums[(currentIndex + 1) % 2]);
+            setCoverColor(current.cover);
+        }
+
+        if (albums.length === 3 || albums.length === 4) {
+            showCovers([centerCover, rightCover, leftCover]);
+            hideCovers([wayLeftCover, wayRightCover]);
+
+            const current = albums[currentIndex];
+            albumTitle.textContent = current.album;
+            artistName.textContent = current.artist;
+            year.textContent = current.year;
+
+            updateThreeCoverImages();
+        }
         
-        const current = albums[currentIndex];
-        albumTitle.textContent = current.album;
-        artistName.textContent = current.artist;
-        year.textContent = current.year;
-        
-        updateCoverImages();
+        if (albums.length >= 5) {
+            centerCover.style.display = 'block';
+            rightCover.style.display = 'block';
+            leftCover.style.display = 'block';
+            wayLeftCover.style.display = 'block';
+            wayRightCover.style.display = 'block';
+
+            const current = albums[currentIndex];
+            albumTitle.textContent = current.album;
+            artistName.textContent = current.artist;
+            year.textContent = current.year;
+            
+            updateFiveCoverImages();
+        }
+
+        currentIndex = currentIndex % albums.length; // ensure valid index
+
+        return;
     }
 
-    async function updateCoverImages() {
+    function showCovers(covers) {
+        covers.forEach((cover) => {
+            cover.style.display = 'block';
+        });
+    }
+
+    function hideCovers(covers) {
+        covers.forEach((cover) => {
+            cover.style.display = 'none';
+        });
+    }
+
+    async function updateThreeCoverImages() {
+        if (albums.length === 0) return;
+
+        const leftIndex = (currentIndex - 1 + albums.length) % albums.length;
+        const rightIndex = (currentIndex + 1) % albums.length;
+        
+        setCoverImage(leftCover, albums[leftIndex]);
+        setCoverImage(centerCover, albums[currentIndex]);
+        setCoverImage(rightCover, albums[rightIndex]);
+
+        setCoverColor(albums[currentIndex].cover);
+    }
+
+    async function updateFiveCoverImages() {
         if (albums.length === 0) return;
 
         const wayLeftIndex = (currentIndex - 2 + albums.length) % albums.length;
@@ -240,10 +311,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDisplay();
     });
 
-     window.electronAPI.onAlbumAdded(async (albumData) => {
-        // refresh album list
-        albums = await window.electronAPI.getAlbums();      
-        
+    // listen for an album added
+    window.electronAPI.onAlbumAdded(async (albumData) => {
+        albums = await window.electronAPI.getAlbums(); // refresh album list   
+        window.electronAPI.debug(`Album added: ${albumData.album} by ${albumData.artist}`); 
         // get new album index
         currentIndex = albums.findIndex(album => 
             album.album === albumData.album &&
