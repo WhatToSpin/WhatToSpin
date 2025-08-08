@@ -2,12 +2,9 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
+import albumArt from 'album-art';
 
 dotenv.config();
-const LASTFM_API_KEY = process.env.LASTFM_API_KEY;
-if (!LASTFM_API_KEY) {
-    throw new Error('LASTFM_API_KEY is not set in the environment variables');
-}
 const __dirname = path.resolve();
 const COLLECTION_PATH = path.join(__dirname, 'src', 'collection.json');
 
@@ -71,25 +68,18 @@ async function getAlbumsFromCollection() {
 }
 
 async function getAlbumCover(album, artist) {
-    const params = new URLSearchParams({
-        method: 'album.getinfo',
-        api_key: LASTFM_API_KEY,
-        artist: artist,
-        album: album,
-        format: 'json'
-    });
-    const url = `https://ws.audioscrobbler.com/2.0/?${params.toString()}`;
+    const coverUrl = await albumArt(artist, { album: album, size: 'large' });
+    if (!coverUrl) {
+        return null;
+    }
 
-    const response = await fetch(url);
+    // checking cover;
+    const response = await fetch(coverUrl);
     if (!response.ok) {
         return null;
     }
 
-    const data = await response.json();
-
-    // getting cover
-    const covers = data.album.image;
-    const cover = covers.find(img => img.size === 'large') || covers[0];
+    const cover = { '#text': coverUrl };
     const coverPath = await saveAlbumCover(album, artist, cover);
 
     return coverPath;
