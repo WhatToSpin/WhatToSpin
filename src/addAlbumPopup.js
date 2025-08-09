@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (currentAlbumCoverColor) {
         submitAlbumButton.style.setProperty('background-color', currentAlbumCoverColor, 'important');
-        
+
         // set text color 
         const color = currentAlbumCoverColor.replace('#', '');        
         const r = parseInt(color.slice(0, 2), 16);
@@ -21,6 +21,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
         submitAlbumButton.style.setProperty('color', textColor, 'important');
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .input:focus {
+                border-color: ${currentAlbumCoverColor} !important;
+                border-width: 2px !important;
+                padding: 11px !important;
+                box-shadow: none !important;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     // close behavior
