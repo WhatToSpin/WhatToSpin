@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!albumData) {
             // album was delete -- reset index
-            currentIndex = getRandomIndex(albums.length);
+            currentIndex = currentIndex > 0 ? getRandomIndex(albums.length) : 0;
         } else {
             // get new album index
             currentIndex = albums.findIndex(album => 
