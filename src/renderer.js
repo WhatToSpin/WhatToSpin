@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     // skip very light colors
                     const brightness = (r + g + b) / 3;
-                    if (brightness > 225) continue;
+                    if (brightness < 60 || brightness > 225) continue;
                     
                     const quantizeLevel = 32;
                     const qR = Math.floor(r / quantizeLevel) * quantizeLevel;
