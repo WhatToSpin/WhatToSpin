@@ -67,7 +67,7 @@ async function addAlbumToCollection(albumData) {
             album: album,
             artist: artist,
             year: year,
-            cover: coverPath,
+            coverPath: coverPath,
         };
 
         collection.albums.push(newAlbum);
@@ -158,7 +158,7 @@ async function deleteAlbumFromCollection(albumData) {
 
     const album = albumData.album;
     const artist = albumData.artist;
-    const coverPath = albumData.cover;
+    const coverPath = albumData.coverPath;
 
     // make sure collection.json exists
     let collection = await getAlbumsFromCollection();
@@ -205,13 +205,13 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     if (oldAlbumData.album !== newAlbumData.album || oldAlbumData.artist !== newAlbumData.artist) {
         coverPath = await generateCoverPath(newAlbumData.album, newAlbumData.artist);
         try {
-            fs.renameSync(oldAlbumData.cover, coverPath);
+            fs.renameSync(oldAlbumData.coverPath, coverPath);
         } catch (err) {
             console.error('Error renaming file:', err);
-            coverPath = oldAlbumData.cover; // fallback to old cover path
+            coverPath = oldAlbumData.coverPath; // fallback to old cover path
         }
     } else {
-        coverPath = oldAlbumData.cover;
+        coverPath = oldAlbumData.coverPath;
     }
 
     // overwrite cover data if new cover uploaded
@@ -225,7 +225,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
         album: newAlbumData.album,
         artist: newAlbumData.artist,
         year: newAlbumData.year,
-        cover: coverPath
+        coverPath: coverPath
     }
 
     if (oldAlbumData.artist !== newAlbumData.artist || oldAlbumData.year !== newAlbumData.year) {

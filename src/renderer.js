@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             setCoverImage(centerCover, current); // only set center cover
-            setCoverColor(current.cover);
+            setCoverColor(current.coverPath);
 
             return;
         }
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             setCoverImage(centerCover, current);
             setCoverImage(rightCover, albums[(currentIndex + 1) % 2]);
-            setCoverColor(current.cover);
+            setCoverColor(current.coverPath);
 
             return;
         }
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(centerCover, albums[currentIndex]);
         setCoverImage(rightCover, albums[rightIndex]);
 
-        setCoverColor(albums[currentIndex].cover);
+        setCoverColor(albums[currentIndex].coverPath);
     }
 
     async function updateFiveCoverImages() {
@@ -150,17 +150,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(rightCover, albums[rightIndex]);
         setCoverImage(wayRightCover, albums[wayRightIndex]);
 
-        setCoverColor(albums[currentIndex].cover);
+        setCoverColor(albums[currentIndex].coverPath);
     }
 
     function setCoverImage(imgElement, album) {
-        if (!album || !album.cover) {
+        if (!album || !album.coverPath) {
             imgElement.src = '';
             imgElement.alt = 'No cover available';
             return;
         }
         
-        let coverPath = album.cover;
+        let coverPath = album.coverPath;
         
         if (coverPath.includes('/src/covers/')) {
             const filename = coverPath.split('/').pop();

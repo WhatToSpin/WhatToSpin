@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const coverImg = document.getElementById('focusedCover');
 
-            if (albumData.cover) {
-                const coverFileName = albumData.cover.split('/').pop();
+            if (albumData.coverPath) {
+                const coverFileName = albumData.coverPath.split('/').pop();
                 const relativeCoverPath = `covers/${coverFileName}`;
 
                 coverImg.src = `${relativeCoverPath}?t=${Date.now()}`;

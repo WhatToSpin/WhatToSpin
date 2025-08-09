@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const coverImg = document.getElementById('editCover');
 
-            if (oldAlbumData.cover && oldAlbumData.cover !== UNKNOWN_COVER_PATH) {
-                const coverFileName = oldAlbumData.cover.split('/').pop();
+            if (oldAlbumData.coverPath && oldAlbumData.coverPath !== UNKNOWN_COVER_PATH) {
+                const coverFileName = oldAlbumData.coverPath.split('/').pop();
                 const relativeCoverPath = `covers/${coverFileName}`;
                 
                 coverImg.src = relativeCoverPath;
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let coverPath;
         if (oldAlbumDataString) {
             const oldAlbumData = JSON.parse(oldAlbumDataString);
-            coverPath = oldAlbumData.cover;
+            coverPath = oldAlbumData.coverPath;
         } else {
             coverPath = UNKNOWN_COVER_PATH;
         }
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             album: newAlbum,
             artist: newArtist,
             year: newYear,
-            cover: coverPath // keep old cover path for now (will be updated later if album/artist changed)
+            coverPath: coverPath // keep old cover path for now (will be updated later if album/artist changed)
         };
 
         try {
