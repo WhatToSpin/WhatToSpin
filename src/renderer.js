@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     if (alpha < 128) continue;
                     
-                    // skip very light colors
+                    // skip very dark and very light colors
                     const brightness = (r + g + b) / 3;
                     if (brightness < 60 || brightness > 225) continue;
                     
