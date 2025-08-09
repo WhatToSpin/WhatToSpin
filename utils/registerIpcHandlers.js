@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { addAlbumToCollection, getAlbumsFromCollection, deleteAlbumFromCollection, updateAlbumInCollection } from './albumManager.js';
 import { BrowserWindow } from 'electron';
 import path from 'path';
+import { all } from 'axios';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -33,7 +34,19 @@ export function registerIpcHandlers() {
 
     ipcMain.handle('delete-album', async (event, albumData) => {
         try {
-            await deleteAlbumFromCollection(albumData);
+            const result = await deleteAlbumFromCollection(albumData);
+
+            if (result.success && result.isEmpty) {
+                const allWindows = BrowserWindow.getAllWindows();
+                const mainWindow = allWindows.find(win => !win.getParentWindow());
+
+                if (mainWindow) {
+                    setTimeout(() => {
+                        mainWindow.reload();
+                    }, 100);
+                }
+            }
+
             return { success: true };
         } catch (error) {
             console.error('Error deleting album:', error);
@@ -83,8 +96,8 @@ export function registerIpcHandlers() {
         const popupHeight = 300;
         const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
         const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
-        3
-        const popupWindow = new BrowserWindow({
+        
+        let addAlbumWindow = new BrowserWindow({
             width: popupWidth,
             height: popupHeight,
             x: popupX,
@@ -102,12 +115,12 @@ export function registerIpcHandlers() {
         });
 
         const encodedColor = encodeURIComponent(currentAlbumCoverColor || '#cfcfcf');
-        popupWindow.loadFile('src/addAlbumPopup.html', { 
+        addAlbumWindow.loadFile(path.join(__dirname, '../src/addAlbumPopup.html'), { 
             query: { currentAlbumCoverColor: encodedColor } 
         });
 
-        popupWindow.on('closed', () => {
-            popupWindow = null;
+        addAlbumWindow.on('closed', () => {
+            addAlbumWindow = null;
         });
     });
 
@@ -122,7 +135,7 @@ export function registerIpcHandlers() {
         const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
         const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
 
-        const popupWindow = new BrowserWindow({
+        let albumFocusWindow = new BrowserWindow({
             width: popupWidth,
             height: popupHeight,
             x: popupX,
@@ -139,15 +152,15 @@ export function registerIpcHandlers() {
             }
         });
 
-        popupWindow.loadFile('src/albumFocusPopup.html', {
+        albumFocusWindow.loadFile(path.join(__dirname, '../src/albumFocusPopup.html'), {
             query: { 
                 albumData: JSON.stringify(albumData), 
                 albumCoverColor: encodeURIComponent(albumCoverColor) 
             }
         });
         
-        popupWindow.on('closed', () => {
-            popupWindow = null;
+        albumFocusWindow.on('closed', () => {
+            albumFocusWindow = null;
         });
     });
 
@@ -163,7 +176,7 @@ export function registerIpcHandlers() {
         const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
         const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
 
-        const popupWindow = new BrowserWindow({
+        let editAlbumWindow = new BrowserWindow({
             width: popupWidth,
             height: popupHeight,
             x: popupX,
@@ -180,15 +193,15 @@ export function registerIpcHandlers() {
             }
         });
 
-        popupWindow.loadFile('src/editAlbumPopup.html', {
+        editAlbumWindow.loadFile(path.join(__dirname, '../src/editAlbumPopup.html'), {
             query: { 
                 albumData: JSON.stringify(albumData),
                 albumCoverColor: encodeURIComponent(albumCoverColor)
             }
         });
 
-        popupWindow.on('closed', () => {
-            popupWindow = null;
+        editAlbumWindow.on('closed', () => {
+            editAlbumWindow = null;
         });
     });
 }

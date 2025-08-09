@@ -198,7 +198,7 @@ async function deleteAlbumFromCollection(albumData) {
         JSON.stringify(collection, null, 2)
     );
 
-    return { success: true };
+    return { success: true, isEmpty: collection.albums.length === 0 };
 }
 
 async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
