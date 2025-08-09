@@ -1,5 +1,10 @@
 import { ipcMain } from 'electron';
-import { addAlbumToCollection, getAlbumsFromCollection, deleteAlbumFromCollection, updateAlbumInCollection } from './albumManager.js';
+import { 
+    addAlbumToCollection, 
+    getAlbumsFromCollection, 
+    deleteAlbumFromCollection, 
+    updateAlbumInCollection,
+} from './albumManager.js';
 import { BrowserWindow } from 'electron';
 import path from 'path';
 import { all } from 'axios';
@@ -54,10 +59,10 @@ export function registerIpcHandlers() {
         }
     });
 
-    ipcMain.handle('update-album', async (event, albumDataString, updatedAlbumData) => {
+    ipcMain.handle('update-album', async (event, albumDataString, updatedAlbumData, newCoverData) => {
         try {
-            await updateAlbumInCollection(albumDataString, updatedAlbumData);
-            return { success: true };
+            const result = await updateAlbumInCollection(albumDataString, updatedAlbumData, newCoverData);
+            return { success: true, updatedAlbum: result.updatedAlbum };
         } catch (error) {
             console.error('Error updating album:', error);
             return { success: false, error: error.message };
@@ -77,11 +82,6 @@ export function registerIpcHandlers() {
         const albumFocus = editAlbumPopup.getParentWindow();
 
         albumFocus.webContents.send('album-was-updated', albumData);
-        return { success: true };
-    });
-
-    ipcMain.handle('debug', (event, message) => {
-        console.log(message);
         return { success: true };
     });
 
@@ -202,5 +202,10 @@ export function registerIpcHandlers() {
         editAlbumWindow.on('closed', () => {
             editAlbumWindow = null;
         });
+    });
+
+    ipcMain.handle('debug', (event, message) => {
+        console.log(message);
+        return { success: true };
     });
 }

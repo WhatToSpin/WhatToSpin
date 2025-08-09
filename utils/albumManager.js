@@ -14,7 +14,6 @@ async function getAlbumsFromCollection() {
         collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
         collection = JSON.parse(collection);
     } catch (error) {
-        console.log('making collection.json');
         collection = { albums: [] };
         await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
     }
@@ -135,30 +134,20 @@ async function saveAlbumCover(album, artist, cover) {
         throw new Error('Invalid parameters for saveAlbumCover');
     }
 
-    // sanatize for filename
-    const albumSafe = String(album).replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const artistSafe = String(artist).replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const randomId = Math.floor(Math.random() * 1000000).toString();
-    
-    if (!albumSafe || !artistSafe) {
-        throw new Error('Album and artist names cannot be empty after sanitization');
-    }
-
+    // make sure cover directory exists
     const coverDir = path.join(__dirname, 'src', 'covers');
-
-    const coverUrl = cover['#text'];
-    const filename = `${artistSafe}_${albumSafe}_${randomId}.png`;
-    const coverPath = path.join(coverDir, filename);
-
     if (!fs.existsSync(coverDir)) {
         fs.mkdirSync(coverDir, { recursive: true });
     }
 
+    const coverUrl = cover['#text'];
     const response = await fetch(coverUrl);
     if (!response.ok) {
         throw new Error(`Failed to fetch cover image: ${response.statusText}`);
     }
 
+    // get cover path and save image
+    const coverPath = await generateCoverPath(album, artist);
     const buffer = await response.arrayBuffer();
     fs.writeFileSync(coverPath, Buffer.from(buffer));
 
@@ -200,7 +189,7 @@ async function deleteAlbumFromCollection(albumData) {
     return { success: true, isEmpty: collection.albums.length === 0 };
 }
 
-async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
+async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData) {
     
     let collection = await getAlbumsFromCollection();
 
@@ -211,14 +200,32 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
         throw new Error('Album not found in the collection');
     }
 
-    // handle cover images
+    // change cover path if album/artist changed
+    let coverPath;
+    if (oldAlbumData.album !== newAlbumData.album || oldAlbumData.artist !== newAlbumData.artist) {
+        coverPath = await generateCoverPath(newAlbumData.album, newAlbumData.artist);
+        try {
+            fs.renameSync(oldAlbumData.cover, coverPath);
+        } catch (err) {
+            console.error('Error renaming file:', err);
+            coverPath = oldAlbumData.cover; // fallback to old cover path
+        }
+    } else {
+        coverPath = oldAlbumData.cover;
+    }
+
+    // overwrite cover data if new cover uploaded
+    if (newCoverData) {
+        const buffer = Buffer.from(newCoverData);
+        fs.writeFileSync(coverPath, buffer); // write new cover data to the correct path
+    }
 
     // update album metadata
     collection.albums[albumIndex] = {
         album: newAlbumData.album,
         artist: newAlbumData.artist,
         year: newAlbumData.year,
-        cover: oldAlbumData.cover // keep the same cover for now
+        cover: coverPath
     }
 
     if (oldAlbumData.artist !== newAlbumData.artist || oldAlbumData.year !== newAlbumData.year) {
@@ -231,12 +238,25 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData) {
         JSON.stringify(collection, null, 2)
     );
 
-    return { success: true };
+    return { success: true, updatedAlbum: collection.albums[albumIndex] };
+}
+
+async function generateCoverPath(album, artist) {
+    const albumSafe = String(album).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const artistSafe = String(artist).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const randomId = Math.floor(Math.random() * 1000000).toString();
+
+    const coverDir = path.join(__dirname, 'src', 'covers');
+
+    const filename = `${artistSafe}_${albumSafe}_${randomId}.png`;
+    const coverPath = path.join(coverDir, filename);
+
+    return coverPath;
 }
 
 export {
     addAlbumToCollection,
     getAlbumsFromCollection, 
     deleteAlbumFromCollection,
-    updateAlbumInCollection
+    updateAlbumInCollection,
 };

@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('focusedYear').textContent = albumData.year;
             
             const coverImg = document.getElementById('focusedCover');
+
             if (albumData.cover) {
                 const coverFileName = albumData.cover.split('/').pop();
                 const relativeCoverPath = `covers/${coverFileName}`;
-                
-                coverImg.src = relativeCoverPath;
+
+                coverImg.src = `${relativeCoverPath}?t=${Date.now()}`;
                 coverImg.alt = `${albumData.album} by ${albumData.artist}`;
                 
                 coverImg.onerror = () => {

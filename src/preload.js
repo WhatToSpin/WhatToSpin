@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     deleteAlbumFromCollection: (albumData) => ipcRenderer.invoke('delete-album', albumData),
 
-    updateAlbumInCollection: (albumDataString, updatedAlbumData) => ipcRenderer.invoke('update-album', albumDataString, updatedAlbumData),
+    updateAlbumInCollection: (albumDataString, updatedAlbumData, newCoverData) => ipcRenderer.invoke('update-album', albumDataString, updatedAlbumData, newCoverData),
 
     openAddAlbumPopup: (currentAlbumCoverColor) => ipcRenderer.invoke('open-add-album-popup', currentAlbumCoverColor),
 

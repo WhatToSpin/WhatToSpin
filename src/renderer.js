@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             coverPath = `covers/${filename}`;
         }
         
-        imgElement.src = coverPath;
+        imgElement.src = `${coverPath}?t=${Date.now()}`;
         imgElement.alt = `${album.album} by ${album.artist}`;
         
         imgElement.onerror = function() {
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const relativeCoverPath = `covers/${coverFileName}`;
 
         const img = new Image();
-        img.src = relativeCoverPath;
+        img.src = `${relativeCoverPath}?t=${Date.now()}`;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
