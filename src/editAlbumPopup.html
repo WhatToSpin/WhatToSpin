@@ -132,36 +132,87 @@
 
     h1 {
         color: #333;
-        padding: 2px;
+        padding: 3px;
         border: 1px solid #ccc;
         font-size: 18px;
         margin: 5px 0 3px;
         transition: opacity 0.3s ease;
+        max-width: 280px;
+        min-width: 100px;
+        width: fit-content;
+        overflow-x: auto;
+        overflow-y: hidden;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        box-sizing: border-box;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        scrollbar-width: none; 
+        -ms-overflow-style: none; 
+    }
+
+    h1::-webkit-scrollbar {
+        display: none;
     }
 
     h2 {
         color: #666;
-        padding: 2px;
+        padding: 3px;
         border: 1px solid #ccc;
         font-size: 16px;
         margin: 5px 0;
         transition: opacity 0.3s ease;
+        max-width: 280px;
+        min-width: 100px;
+        width: fit-content;
+        overflow-x: auto;
+        overflow-y: hidden;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        box-sizing: border-box;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none; 
+    }
+
+    h2::-webkit-scrollbar {
+        display: none;
     }
 
     p {
         color: #888;
-        padding: 2px;
+        padding: 3px;
         border: 1px solid #ccc;
         font-size: 12px;
         font-weight: bold;
         margin: 5px 0;
         transition: opacity 0.3s ease;
+        max-width: 280px;
+        min-width: 100px;
+        width: fit-content;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        box-sizing: border-box;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    p::-webkit-scrollbar {
+        display: none;
+    }
+
+    h1:focus,
+    h2:focus,
+    p:focus {
+        outline: none;
+        border-color: #cfcfcf;
+        border-width: 2px;
+        padding: 2px;
     }
 
 </style>

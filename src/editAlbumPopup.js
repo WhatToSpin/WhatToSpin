@@ -20,6 +20,11 @@ if (albumCoverColor) {
             color: ${textColor} !important;
             font-weight: bold !important;
         }
+        h1:focus,
+        h2:focus,
+        p:focus {
+            border-color: ${albumCoverColor} !important;
+        }
     `;
     
     document.head.appendChild(style);
