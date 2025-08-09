@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentAlbumCoverColor = '#cfcfcf'; // for 'add' button 
     
     try {
-        // test when this is rerun next...
         collection = await window.electronAPI.getAlbumsFromCollection();
         albums = collection.albums;    
         currentIndex = getRandomIndex(albums.length); // start with a random album
@@ -259,16 +258,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    shuffleButton.addEventListener('click', () => {
+    shuffleButton.addEventListener('click', async () => {
         if (albums.length === 0) return;
-        shuffleAlbums();
+        await shuffleAlbums();
     });
 
-    function shuffleAlbums() {
+    async function shuffleAlbums() {
         const shuffleTime = 1 * 1000 + Math.random() * 2000; // 1 - 3 seconds
         const startTime = Date.now();
         
-        const shuffleInterval = setInterval(() => {
+        const shuffleInterval = setInterval(async () => {
             currentIndex = (currentIndex + 1) % albums.length;
             updateDisplay();
             
@@ -277,6 +276,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // selected album
                 currentIndex = getRandomIndex(albums.length);
                 updateDisplay();
+                
+                // show focused album after 500 ms
+                setTimeout(async () => {
+                    try {
+                        await window.electronAPI.openAlbumFocusPopup(albums[currentIndex], currentAlbumCoverColor);
+                    } catch (error) {
+                        console.error('Error opening album focus popup:', error);
+                        alert('Failed to open album focus popup. Please try again.');
+                    }
+
+                }, 500);
             }
         }, 100); // update every 100ms 
     }

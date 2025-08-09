@@ -4,7 +4,6 @@ import path from 'path';
 import dotenv from 'dotenv';
 import albumArt from 'album-art';
 
-dotenv.config();
 const __dirname = path.resolve();
 const COLLECTION_PATH = path.join(__dirname, 'src', 'collection.json');
 const UNKNOWN_COVER_PATH = path.join(__dirname, 'src', 'covers', 'unknown.png');

@@ -56,7 +56,6 @@ export function registerIpcHandlers() {
 
     ipcMain.handle('update-album', async (event, albumDataString, updatedAlbumData) => {
         try {
-
             await updateAlbumInCollection(albumDataString, updatedAlbumData);
             return { success: true };
         } catch (error) {
