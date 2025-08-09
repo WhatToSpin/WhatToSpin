@@ -41,6 +41,18 @@
             box-shadow: 0 0 0 2px rgba(40, 108, 167, 0.2);
         }
 
+        /* Hide number input spinner arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
         .submit-button {
             width: 100%;
             padding: 12px;
