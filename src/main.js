@@ -1,9 +1,5 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 let registerIpcHandlers;
 
@@ -13,7 +9,7 @@ async function loadModules() {
 }
 
 async function createWindow() {
-    const window = new BrowserWindow({
+    const mainWindow = new BrowserWindow({
         width: 600,
         height: 350,
         show: false,
@@ -26,8 +22,8 @@ async function createWindow() {
         }
     });
 
-    await window.loadFile('src/index.html');
-    window.show();
+    await mainWindow.loadFile('src/index.html');
+    mainWindow.show();
 }
 
 app.whenReady().then(async () => {
