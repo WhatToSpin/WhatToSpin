@@ -1,7 +1,6 @@
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
-import dotenv from 'dotenv';
 import albumArt from 'album-art';
 
 const __dirname = path.resolve();

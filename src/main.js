@@ -1,5 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import fs from 'fs/promises';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
