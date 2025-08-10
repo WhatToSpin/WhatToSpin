@@ -55,13 +55,6 @@
       "!build",
       "!scripts"
     ],
-    "extraResources": [
-      {
-        "from": "src/assets/",
-        "to": "assets/",
-        "filter": ["**/*"]
-      }
-    ],
     "mac": {
       "category": "public.app-category.entertainment",
       "target": [

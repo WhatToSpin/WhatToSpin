@@ -147,10 +147,18 @@ button, .cover, .shuffle-icon, .add-icon {
 }
 
 .shuffle-icon {
-    background: url('./assets/images/shuffle.png') no-repeat center center;
-    background-size: contain;
+    padding: 0;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shuffle-icon img {
     height: 24px;
     width: 24px;
+    object-fit: contain;
 }
 
 .shuffle-icon:hover {
