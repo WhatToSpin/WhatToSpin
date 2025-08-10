@@ -1,8 +1,10 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let registerIpcHandlers;
-
 async function loadModules() {
     const ipcModule = await import('./registerIpcHandlers.js');
     registerIpcHandlers = ipcModule.registerIpcHandlers;
@@ -29,7 +31,7 @@ async function createWindow() {
 app.whenReady().then(async () => {
     await loadModules();
     registerIpcHandlers();
-    createWindow();
+    await createWindow();
 });
 
 app.on('window-all-closed', () => {
@@ -43,4 +45,3 @@ app.on('activate', () => {
         createWindow();
     }
 });
-    
