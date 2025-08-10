@@ -4,10 +4,9 @@ import {
     getAlbumsFromCollection, 
     deleteAlbumFromCollection, 
     updateAlbumInCollection,
-} from './albumManager.js';
+} from '../utils/albumManager.js';
 import { BrowserWindow } from 'electron';
 import path from 'path';
-import { all } from 'axios';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -109,12 +108,12 @@ export function registerIpcHandlers() {
             webPreferences: {
                 contextIsolation: true,
                 enableRemoteModule: false,
-                preload: path.join(__dirname, '../src/preload.js')
+                preload: path.join(__dirname, './preload.js')
             }
         });
 
         const encodedColor = encodeURIComponent(currentAlbumCoverColor || '#cfcfcf');
-        addAlbumWindow.loadFile(path.join(__dirname, '../src/addAlbumPopup.html'), { 
+        addAlbumWindow.loadFile(path.join(__dirname, './popups/addAlbumPopup.html'), { 
             query: { currentAlbumCoverColor: encodedColor } 
         });
 
@@ -147,11 +146,11 @@ export function registerIpcHandlers() {
             webPreferences: {
                 contextIsolation: true,
                 enableRemoteModule: false,
-                preload: path.join(__dirname, '../src/preload.js')
+                preload: path.join(__dirname, './preload.js')
             }
         });
 
-        albumFocusWindow.loadFile(path.join(__dirname, '../src/albumFocusPopup.html'), {
+        albumFocusWindow.loadFile(path.join(__dirname, './popups/albumFocusPopup.html'), {
             query: { 
                 albumData: JSON.stringify(albumData), 
                 albumCoverColor: encodeURIComponent(albumCoverColor) 
@@ -188,11 +187,11 @@ export function registerIpcHandlers() {
             webPreferences: {
                 contextIsolation: true,
                 enableRemoteModule: false,
-                preload: path.join(__dirname, '../src/preload.js')
+                preload: path.join(__dirname, './preload.js')
             }
         });
 
-        editAlbumWindow.loadFile(path.join(__dirname, '../src/editAlbumPopup.html'), {
+        editAlbumWindow.loadFile(path.join(__dirname, './popups/editAlbumPopup.html'), {
             query: { 
                 albumData: JSON.stringify(albumData),
                 albumCoverColor: encodeURIComponent(albumCoverColor)

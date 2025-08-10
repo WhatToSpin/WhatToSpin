@@ -23,17 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (albumData.coverPath) {
                 const coverFileName = albumData.coverPath.split('/').pop();
-                const relativeCoverPath = `covers/${coverFileName}`;
+                const relativeCoverPath = `../assets/covers/${coverFileName}`;
 
                 coverImg.src = `${relativeCoverPath}?t=${Date.now()}`;
                 coverImg.alt = `${albumData.album} by ${albumData.artist}`;
                 
                 coverImg.onerror = () => {
-                    coverImg.src = 'covers/unknown.png';
+                    coverImg.src = '../assets/covers/unknown.png';
                     coverImg.alt = 'Album cover not found';
                 };
             } else {
-                coverImg.src = 'covers/unknown.png';
+                coverImg.src = '../assets/covers/unknown.png';
                 coverImg.alt = 'Album cover not found';
             }
         } catch (error) {
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('focusedAlbumTitle').textContent = 'Unknown Album';
             document.getElementById('focusedArtistName').textContent = 'Unknown Artist';
             document.getElementById('focusedYear').textContent = '';
-            document.getElementById('focusedCover').src = 'covers/unknown.png';
+            document.getElementById('focusedCover').src = '../assets/covers/unknown.png';
         }
     }
     

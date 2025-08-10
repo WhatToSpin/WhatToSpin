@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCover = document.getElementById('editCover');
     const coverInput = document.getElementById('coverInput');
 
-    const UNKNOWN_COVER_PATH = 'covers/unknown.png';
+    const UNKNOWN_COVER_PATH = '../assets/covers/unknown.png';
     let newCoverData = null; // if new cover uploaded
     
     if (oldAlbumDataString) {
@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (oldAlbumData.coverPath && oldAlbumData.coverPath !== UNKNOWN_COVER_PATH) {
                 const coverFileName = oldAlbumData.coverPath.split('/').pop();
-                const relativeCoverPath = `covers/${coverFileName}`;
+                const relativeCoverPath = `../assets/covers/${coverFileName}`;
                 
                 coverImg.src = relativeCoverPath;
                 coverImg.alt = `${oldAlbumData.album} by ${oldAlbumData.artist}`;
                 
                 coverImg.onerror = () => {
-                    coverImg.src = 'covers/unknown.png';
+                    coverImg.src = '../assets/covers/unknown.png';
                     coverImg.alt = 'Album cover not found';
                 };
             } else {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('editAlbumTitle').textContent = 'Unknown Album';
             document.getElementById('editArtistName').textContent = 'Unknown Artist';
             document.getElementById('editYear').textContent = 'Unknown Year';
-            document.getElementById('editCover').src = 'covers/unknown.png';
+            document.getElementById('editCover').src = '../assets/covers/unknown.png';
         }
     }
     

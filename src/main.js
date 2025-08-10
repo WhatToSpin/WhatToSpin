@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 let registerIpcHandlers;
 
 async function loadModules() {
-    const ipcModule = await import('../utils/registerIpcHandlers.js');
+    const ipcModule = await import('./registerIpcHandlers.js');
     registerIpcHandlers = ipcModule.registerIpcHandlers;
 }
 

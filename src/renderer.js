@@ -162,15 +162,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let coverPath = album.coverPath;
         
-        if (coverPath.includes('/src/covers/')) {
+        if (coverPath.includes('/src/assets/covers/')) {
             const filename = coverPath.split('/').pop();
-            coverPath = `covers/${filename}`;
+            coverPath = `assets/covers/${filename}`;
         } else if (coverPath.includes('/covers/')) {
             const filename = coverPath.split('/').pop();
-            coverPath = `../covers/${filename}`;
+            coverPath = `../assets/covers/${filename}`;
         } else if (coverPath.startsWith('/')) {
             const filename = coverPath.split('/').pop();
-            coverPath = `covers/${filename}`;
+            coverPath = `assets/covers/${filename}`;
         }
         
         imgElement.src = `${coverPath}?t=${Date.now()}`;
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const coverFileName = albumCover.split('/').pop();
-        const relativeCoverPath = `covers/${coverFileName}`;
+        const relativeCoverPath = `assets/covers/${coverFileName}`;
 
         const img = new Image();
         img.src = `${relativeCoverPath}?t=${Date.now()}`;
@@ -333,19 +333,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     // listen for an album added
     window.electronAPI.onAlbumAdded(async (albumData) => {
 
+        // store the current album before refreshing the collection
+        const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;
+
         // refresh album list
         collection = await window.electronAPI.getAlbumsFromCollection();
         albums = collection.albums;
 
         if (!albumData) {
-            // album was delete -- reset index
+            // album was deleted -- reset index
             currentIndex = currentIndex > 0 ? getRandomIndex(albums.length) : 0;
         } else {
-            // get new album index
-            currentIndex = albums.findIndex(album => 
+            // try to find the updated album by matching the albumData provided
+            let newIndex = albums.findIndex(album => 
                 album.album === albumData.album &&
                 album.artist === albumData.artist
             );
+
+            // if not found and we had a current album, try to stay on the same position
+            if (newIndex === -1 && currentAlbum) {
+                // try to find by original album data
+                newIndex = albums.findIndex(album => 
+                    album.album === currentAlbum.album &&
+                    album.artist === currentAlbum.artist
+                );
+            }
+
+            // if still not found, try to maintain current position or use 0
+            if (newIndex === -1) {
+                currentIndex = currentIndex < albums.length ? currentIndex : 0;
+            } else {
+                currentIndex = newIndex;
+            }
         }
 
         updateDisplay();

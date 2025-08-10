@@ -6,7 +6,7 @@ import albumArt from 'album-art';
 
 const __dirname = path.resolve();
 const COLLECTION_PATH = path.join(__dirname, 'src', 'collection.json');
-const UNKNOWN_COVER_PATH = path.join(__dirname, 'src', 'covers', 'unknown.png');
+const UNKNOWN_COVER_PATH = path.join(__dirname, 'src', 'assets', 'covers', 'unknown.png');
 
 async function getAlbumsFromCollection() {
     let collection;
@@ -135,7 +135,7 @@ async function saveAlbumCover(album, artist, cover) {
     }
 
     // make sure cover directory exists
-    const coverDir = path.join(__dirname, 'src', 'covers');
+    const coverDir = path.join(__dirname, 'src', 'assets', 'covers');
     if (!fs.existsSync(coverDir)) {
         fs.mkdirSync(coverDir, { recursive: true });
     }
@@ -193,13 +193,6 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     
     let collection = await getAlbumsFromCollection();
 
-    const albumIndex = collection.albums.findIndex(
-        (a) => a.album === oldAlbumData.album && a.artist === oldAlbumData.artist
-    );
-    if (albumIndex === -1) {
-        throw new Error('Album not found in the collection');
-    }
-
     // change cover path if album/artist changed
     let coverPath;
     if (oldAlbumData.album !== newAlbumData.album || oldAlbumData.artist !== newAlbumData.artist) {
@@ -220,6 +213,14 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
         fs.writeFileSync(coverPath, buffer); // write new cover data to the correct path
     }
 
+    // get album index
+    let albumIndex = collection.albums.findIndex(
+        (a) => a.album === oldAlbumData.album && a.artist === oldAlbumData.artist
+    );
+    if (albumIndex === -1) {
+        throw new Error('Album not found in the collection');
+    }
+
     // update album metadata
     collection.albums[albumIndex] = {
         album: newAlbumData.album,
@@ -230,6 +231,16 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
 
     if (oldAlbumData.artist !== newAlbumData.artist || oldAlbumData.year !== newAlbumData.year) {
         collection = await sortCollection(collection);
+    }
+
+    // recalculate album index in case order changed
+    if (newAlbumData.year !== oldAlbumData.year) {
+        albumIndex = collection.albums.findIndex(
+            (a) => a.album === oldAlbumData.album && a.artist === oldAlbumData.artist
+        );
+        if (albumIndex === -1) {
+            throw new Error('Album not found in the collection');
+        }
     }
 
     // rewrite to collection.json
@@ -246,7 +257,7 @@ async function generateCoverPath(album, artist) {
     const artistSafe = String(artist).replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const randomId = Math.floor(Math.random() * 1000000).toString();
 
-    const coverDir = path.join(__dirname, 'src', 'covers');
+    const coverDir = path.join(__dirname, 'src', 'assets', 'covers');
 
     const filename = `${artistSafe}_${albumSafe}_${randomId}.png`;
     const coverPath = path.join(coverDir, filename);

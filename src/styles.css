@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 30px 10px 10px 10px;
     background-color: #f0f0f0;
     text-align: center;
     -webkit-app-region: drag;
@@ -15,7 +15,7 @@ button, .cover, .shuffle-icon, .add-icon {
     position: relative;
     width: 300px;
     height: 200px;
-    margin: 0 auto 30px;
+    margin: 0 auto 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,7 +107,7 @@ button, .cover, .shuffle-icon, .add-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     min-height: 80px;
 }
 
@@ -147,7 +147,7 @@ button, .cover, .shuffle-icon, .add-icon {
 }
 
 .shuffle-icon {
-    background: url('./images/shuffle.png') no-repeat center center;
+    background: url('./assets/images/shuffle.png') no-repeat center center;
     background-size: contain;
     height: 24px;
     width: 24px;
@@ -185,7 +185,7 @@ button, .cover, .shuffle-icon, .add-icon {
 h1 {
     color: #333;
     font-size: 20px;
-    margin: 10px 0 5px;
+    margin: 5px 0 2px;
     transition: opacity 0.3s ease;
     white-space: nowrap;
     overflow: hidden;
@@ -195,7 +195,7 @@ h1 {
 h2 {
     color: #666;
     font-size: 18px;
-    margin: 5px 0;
+    margin: 2px 0;
     transition: opacity 0.3s ease;
     white-space: nowrap;
     overflow: hidden;
@@ -206,6 +206,6 @@ p {
     color: #888;
     font-size: 12px;
     font-weight: bold;
-    margin: 5px 0;
+    margin: 2px 0;
     transition: opacity 0.3s ease;
 }

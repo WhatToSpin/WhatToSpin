@@ -1,20 +1,151 @@
 {
   "name": "what-to-spin",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "src/main.js",
+  "homepage": ".",
+  "author": "Ethan Burmane <ethanburmane@gmail.com>",
+  "description": "Desktop application for storing your vinyl collection and choosing what to spin next.",
+  "license": "ISC",
+  "keywords": ["electron", "desktop", "music", "spin", "vinyl", "collection", "album"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ethanburmane/what-to-spin.git"
+  },
   "scripts": {
     "start": "electron .",
-    "clear": "find src/covers/ -type f ! -name 'unknown.png' -delete && rm src/collection.json"
+    "clear": "find src/assets/covers/ -type f ! -name 'unknown.png' -delete && rm src/collection.json",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder --mac --win --linux",
+    "dist": "npm run build",
+    "release": "electron-builder --publish=always",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "clean": "rimraf dist"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "build": {
+    "appId": "com.whatospin.app",
+    "productName": "What to Spin",
+    "copyright": "Copyright © 2024 ${author}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "utils/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "!dist",
+      "!build",
+      "!scripts"
+    ],
+    "extraResources": [
+      {
+        "from": "src/assets/",
+        "to": "assets/",
+        "filter": ["**/*"]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "gatekeeperAssess": false,
+      "hardenedRuntime": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "publisherName": "What to Spin",
+      "verifyUpdateCodeSignature": false,
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "What to Spin",
+      "include": "build/installer.nsh"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "AudioVideo",
+      "synopsis": "Desktop application for storing your vinyl collection and choosing what to spin next.",
+      "desktop": {
+        "Name": "What to Spin",
+        "Comment": "Desktop application for storing your vinyl collection and choosing what to spin next.",
+        "Categories": "AudioVideo;Audio;Music;",
+        "Keywords": "music;audio;spin;album;"
+      }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ethanburmane",
+        "repo": "what-to-spin",
+        "releaseType": "release"
+      }
+    ]
+  },
   "devDependencies": {
-    "electron": "^37.2.5"
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "rimraf": "^5.0.5"
   },
   "dependencies": {
-    "album-art": "^4.0.0"
+    "album-art": "^4.0.0",
+    "electron-updater": "^6.1.7"
   }
 }
