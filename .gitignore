@@ -17,6 +17,7 @@ logs/
 .env.test.local
 .env.production.local
 src/collection.json
+src/assets/covers/*.png
 .DS_Store
 .DS_Store?
 ._*
