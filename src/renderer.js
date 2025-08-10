@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDisplay();
     }
 
-    function updateDisplay() {
+    async function updateDisplay() {
         if (albums.length === 0) {
             albumTitle.textContent = 'No albums found';
             artistName.textContent = '';
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             setCoverImage(centerCover, current); // only set center cover
-            setCoverColor(current.coverPath);
+            await setCoverColor(current.coverPath);
 
             return;
         }
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             setCoverImage(centerCover, current);
             setCoverImage(rightCover, albums[(currentIndex + 1) % 2]);
-            setCoverColor(current.coverPath);
+            await setCoverColor(current.coverPath);
 
             return;
         }
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             artistName.textContent = current.artist;
             year.textContent = current.year;
 
-            updateThreeCoverImages();
+            await updateThreeCoverImages();
 
             return;
         }
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             artistName.textContent = current.artist;
             year.textContent = current.year;
             
-            updateFiveCoverImages();
+            await updateFiveCoverImages();
             
             return;
         }
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(centerCover, albums[currentIndex]);
         setCoverImage(rightCover, albums[rightIndex]);
 
-        setCoverColor(albums[currentIndex].coverPath);
+        await setCoverColor(albums[currentIndex].coverPath);
     }
 
     async function updateFiveCoverImages() {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(rightCover, albums[rightIndex]);
         setCoverImage(wayRightCover, albums[wayRightIndex]);
 
-        setCoverColor(albums[currentIndex].coverPath);
+        await setCoverColor(albums[currentIndex].coverPath);
     }
 
     function setCoverImage(imgElement, album) {
@@ -269,13 +269,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const shuffleInterval = setInterval(async () => {
             currentIndex = (currentIndex + 1) % albums.length;
-            updateDisplay();
+            await updateDisplay();
             
             if (Date.now() - startTime >= shuffleTime) {
                 clearInterval(shuffleInterval);
                 // selected album
                 currentIndex = getRandomIndex(albums.length);
-                updateDisplay();
+                await updateDisplay();
                 
                 // show focused album after 500 ms
                 setTimeout(async () => {
@@ -310,24 +310,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    leftCover.addEventListener('click', () => {
+    leftCover.addEventListener('click', async () => {
         currentIndex = (currentIndex - 1 + albums.length) % albums.length;
-        updateDisplay();
+        await updateDisplay();
     });
 
-    rightCover.addEventListener('click', () => {
+    rightCover.addEventListener('click', async () => {
         currentIndex = (currentIndex + 1) % albums.length;
-        updateDisplay();
+        await updateDisplay();
     });
 
-    wayLeftCover.addEventListener('click', () => {
+    wayLeftCover.addEventListener('click', async () => {
         currentIndex = (currentIndex - 2 + albums.length) % albums.length;
-        updateDisplay();
+        await updateDisplay();
     });
 
-    wayRightCover.addEventListener('click', () => {
+    wayRightCover.addEventListener('click', async () => {
         currentIndex = (currentIndex + 2) % albums.length;
-        updateDisplay();
+        await updateDisplay();
     });
 
     // listen for an album added
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        updateDisplay();
+        await updateDisplay();
     });
 });
 
