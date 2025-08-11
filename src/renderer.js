@@ -25,11 +25,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             currentIndex = 0; // no albums yet
         }
-        updateDisplay();
+        await updateDisplay();
     } catch (error) {
         console.error('Error loading albums:', error);
         albums = [];
-        updateDisplay();
+        await updateDisplay();
     }
 
     async function updateDisplay() {
