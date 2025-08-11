@@ -7,7 +7,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const COLLECTION_PATH = path.join(__dirname, '..', 'src', 'collection.json');
-const UNKNOWN_COVER_PATH = path.join(__dirname, '..', 'src', 'assets', 'covers', 'unknown.png');
+const COVER_DIR = path.join(__dirname, '..', 'src', 'assets', 'covers');
+const UNKNOWN_COVER_PATH = path.join(COVER_DIR, 'unknown.png');
 
 async function getAlbumsFromCollection() {
     let collection;
@@ -137,9 +138,8 @@ async function saveAlbumCover(album, artist, cover) {
     }
 
     // make sure cover directory exists
-    const coverDir = path.join(__dirname, 'src', 'assets', 'covers');
-    if (!fs.existsSync(coverDir)) {
-        fs.mkdirSync(coverDir, { recursive: true });
+    if (!fs.existsSync(COVER_DIR)) {
+        fs.mkdirSync(COVER_DIR, { recursive: true });
     }
 
     const coverUrl = cover['#text'];
@@ -259,10 +259,8 @@ async function generateCoverPath(album, artist) {
     const artistSafe = String(artist).replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const randomId = Math.floor(Math.random() * 1000000).toString();
 
-    const coverDir = path.join(__dirname, 'src', 'assets', 'covers');
-
     const filename = `${artistSafe}_${albumSafe}_${randomId}.png`;
-    const coverPath = path.join(coverDir, filename);
+    const coverPath = path.join(COVER_DIR, filename);
 
     return coverPath;
 }
