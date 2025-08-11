@@ -76,11 +76,11 @@ export function registerIpcHandlers() {
         return { success: true };
     });
 
-    ipcMain.handle('notify-album-update', async (event, albumData) => {
+    ipcMain.handle('notify-album-update', async (event, updatedAlbumData) => {
         const editAlbumPopup = BrowserWindow.fromWebContents(event.sender);
         const albumFocus = editAlbumPopup.getParentWindow();
 
-        albumFocus.webContents.send('album-was-updated', albumData);
+        albumFocus.webContents.send('album-was-updated', updatedAlbumData);
         return { success: true };
     });
 

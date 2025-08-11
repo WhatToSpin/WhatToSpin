@@ -19,9 +19,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     onAlbumAdded: (callback) => ipcRenderer.on('album-was-added', (event, albumData) => callback(albumData)),
 
-    notifyAlbumUpdated: (albumData) => ipcRenderer.invoke('notify-album-update', albumData),
+    notifyAlbumUpdated: (updatedAlbumData) => ipcRenderer.invoke('notify-album-update', updatedAlbumData),
 
-    onAlbumUpdated: (callback) => ipcRenderer.on('album-was-updated', (event, albumData) => callback(albumData)),
+    onAlbumUpdated: (callback) => ipcRenderer.on('album-was-updated', (event, updatedAlbumData) => callback(updatedAlbumData)),
 
     debug: (message) => ipcRenderer.invoke('debug', message),
 });
