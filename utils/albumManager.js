@@ -233,12 +233,10 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
 
     if (oldAlbumData.artist !== newAlbumData.artist || oldAlbumData.year !== newAlbumData.year) {
         collection = await sortCollection(collection);
-    }
 
-    // recalculate album index in case order changed
-    if (newAlbumData.year !== oldAlbumData.year) {
+        // recalculate album index in case order changed
         albumIndex = collection.albums.findIndex(
-            (a) => a.album === oldAlbumData.album && a.artist === oldAlbumData.artist
+            (a) => a.album === newAlbumData.album && a.artist === newAlbumData.artist
         );
         if (albumIndex === -1) {
             throw new Error('Album not found in the collection');
