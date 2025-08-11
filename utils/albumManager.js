@@ -2,10 +2,12 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import albumArt from 'album-art';
+import { fileURLToPath } from 'url';
 
-const __dirname = path.resolve();
-const COLLECTION_PATH = path.join(__dirname, 'src', 'collection.json');
-const UNKNOWN_COVER_PATH = path.join(__dirname, 'src', 'assets', 'covers', 'unknown.png');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const COLLECTION_PATH = path.join(__dirname, '..', 'src', 'collection.json');
+const UNKNOWN_COVER_PATH = path.join(__dirname, '..', 'src', 'assets', 'covers', 'unknown.png');
 
 async function getAlbumsFromCollection() {
     let collection;
@@ -14,6 +16,7 @@ async function getAlbumsFromCollection() {
         collection = JSON.parse(collection);
     } catch (error) {
         collection = { albums: [] };
+        await fsPromises.mkdir(path.dirname(COLLECTION_PATH), { recursive: true });
         await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
     }
     return collection;

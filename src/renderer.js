@@ -19,8 +19,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     try {
         collection = await window.electronAPI.getAlbumsFromCollection();
-        albums = collection.albums;    
-        currentIndex = getRandomIndex(albums.length); // start with a random album
+        albums = collection.albums;  
+        if (albums.length > 0) {
+            currentIndex = getRandomIndex(albums.length); // start with a random album
+        } else {
+            currentIndex = 0; // no albums yet
+        }
         updateDisplay();
     } catch (error) {
         console.error('Error loading albums:', error);
@@ -296,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await window.electronAPI.openAddAlbumPopup(currentAlbumCoverColor);
         } catch (error) {
             console.error('Error adding album:', error);
-            alert('Failed to add album. Please try again.');
+            alert(`Failed to add album. Please try again. Error: ${error.message}`);
         }
     });
 

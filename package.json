@@ -25,7 +25,8 @@
     "release": "electron-builder --publish=always",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "retry": "if pgrep -f \"What to Spin\" > /dev/null; then killall \"What to Spin\" && npm run clean && npm run pack && open \"dist/mac-arm64/What to Spin.app\"; else npm run clean && npm run pack && open \"dist/mac-arm64/What to Spin.app\"; fi"
   },
   "build": {
     "appId": "com.whatospin.app",

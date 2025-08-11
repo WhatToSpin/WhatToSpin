@@ -18,7 +18,7 @@ export function registerIpcHandlers() {
             return collection;
         } catch (error) {
             console.error('Error getting albums:', error);
-            return [];
+            return { albums: [] };
         }
     });
 
