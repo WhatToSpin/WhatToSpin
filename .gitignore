@@ -50,6 +50,11 @@ certificates/
 *.p12
 *.pfx
 
+# playwright
+test-results
+playwright-report
+*snapshots
+
 # dont ignore 
 !src/assets/images/*
 !src/assets/covers/unknown.png

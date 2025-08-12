@@ -7,12 +7,27 @@
   "author": "Ethan Burmane <ethanburmane@gmail.com>",
   "description": "Desktop application for storing your vinyl collection and choosing what to spin next.",
   "license": "ISC",
-  "keywords": ["electron", "desktop", "music", "spin", "vinyl", "collection", "album"],
+  "keywords": [
+    "electron",
+    "desktop",
+    "music",
+    "spin",
+    "vinyl",
+    "collection",
+    "album"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/ethanburmane/what-to-spin.git"
   },
   "scripts": {
+    "test": "playwright test",
+    "test:add": "playwright test tests/01-add.test.js",
+    "test:move": "playwright test tests/02-move.test.js",
+    "test:edit": "playwright test tests/03-edit.test.js",
+    "test:delete": "playwright test tests/04-delete.test.js",
+    "test:headed": "playwright test --headed",
+    "debug-build": "electron-builder --dir --publish=never",
     "start": "electron .",
     "clear": "find src/assets/covers/ -type f ! -name 'unknown.png' -delete && rm src/collection.json",
     "dev": "electron . --dev",
@@ -61,11 +76,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "build/icon.icns",
@@ -77,11 +98,16 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico",
@@ -103,15 +129,21 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "rpm",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.png",
@@ -139,7 +171,9 @@
     "rimraf": "^5.0.5"
   },
   "dependencies": {
+    "@playwright/test": "^1.54.2",
     "album-art": "^4.0.0",
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "playwright": "^1.54.2"
   }
 }
