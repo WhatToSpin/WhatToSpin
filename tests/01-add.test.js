@@ -7,7 +7,7 @@ test.describe('Add Album Tests', () => {
     let mainWindow;
 
     test.beforeAll(async () => {
-        // clear collection before testing (avoid 'album already added' error)
+        // clear collection before testing
         execSync(
             "find src/assets/covers/ -type f ! -name 'unknown.png' -delete && \
             find src/ -type f -name 'collection.json' -delete"

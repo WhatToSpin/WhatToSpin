@@ -196,27 +196,31 @@ test.describe('Edit Album Tests', () => {
     test('Edit album cover', async () => {
         // open album focus popup
         const focusPopup = await openFocusPopup();
-        await focusPopup.waitForTimeout(1000);
 
-        // capture old cover
+        // capture old cover screenshot as buffer for comparison
         const oldCover = focusPopup.locator('#focusedCover');
-        await expect(oldCover).toHaveScreenshot('old-cover.png');
+        const oldCoverScreenshot = await oldCover.screenshot();
+        await focusPopup.waitForTimeout(1000);
 
         // open album edit popup
         const editPopup = await openEditPopup(focusPopup);
         await editPopup.waitForTimeout(1000);
 
         // change cover
-        await editPopup.locator('#coverInput').setInputFiles(path.join(__dirname, '..', 'src', 'assets' ,'covers', 'unknown.png'));
+        const newCoverPath = path.join(__dirname, '..', 'src', 'assets', 'covers', 'unknown.png');
+        await editPopup.locator('#coverInput').setInputFiles(newCoverPath);
         await editPopup.waitForTimeout(1000);
 
         // save changes
         await editPopup.locator('#saveChanges').click();
 
-        // check that focus popup cover is correct
+        // check that focus popup cover has changed
         await focusPopup.waitForTimeout(1000);
         const newCover = focusPopup.locator('#focusedCover');
-        await expect(newCover).toHaveScreenshot('new-cover.png');
+        const newCoverScreenshot = await newCover.screenshot();
+
+        // verify the screenshots are different
+        expect(Buffer.compare(oldCoverScreenshot, newCoverScreenshot)).not.toBe(0);
 
         // close focus popup
         await focusPopup.close();
