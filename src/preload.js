@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+    getPaths: () => ipcRenderer.invoke('get-paths'),
+
     getAlbumsFromCollection: () => ipcRenderer.invoke('get-albums'),
 
     addAlbumToCollection: (albumData) => ipcRenderer.invoke('add-album', albumData),

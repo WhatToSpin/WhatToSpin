@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
+    const BASE_PATH = await window.electronAPI.getPaths().src;
+    const COVER_DIR = await window.electronAPI.getPaths().covers;
+    const UNKNOWN_COVER_PATH = await window.electronAPI.getPaths().unknownCover;
+
     const albumTitle = document.getElementById('albumTitle');
     const artistName = document.getElementById('artistName');
     const year = document.getElementById('year');
@@ -159,30 +163,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function setCoverImage(imgElement, album) {
         if (!album || !album.coverPath) {
-            imgElement.src = '';
+            imgElement.src = UNKNOWN_COVER_PATH;
             imgElement.alt = 'No cover available';
             return;
         }
         
         let coverPath = album.coverPath;
-        
-        if (coverPath.includes('/src/assets/covers/')) {
-            const filename = coverPath.split('/').pop();
-            coverPath = `assets/covers/${filename}`;
-        } else if (coverPath.includes('/covers/')) {
-            const filename = coverPath.split('/').pop();
-            coverPath = `../assets/covers/${filename}`;
-        } else if (coverPath.startsWith('/')) {
-            const filename = coverPath.split('/').pop();
-            coverPath = `assets/covers/${filename}`;
-        }
-        
         imgElement.src = `${coverPath}?t=${Date.now()}`;
         imgElement.alt = `${album.album} by ${album.artist}`;
         
         imgElement.onerror = function() {
             console.log(`Failed to load cover: ${coverPath}`);
-            this.src = '';
+            this.src = UNKNOWN_COVER_PATH;
             this.alt = 'Cover not found';
             this.style.display = 'none';
         };
@@ -192,16 +184,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }   
 
-    async function setCoverColor(albumCover) {
-        if (!albumCover) {
+    async function setCoverColor(albumCoverPath) {
+        if (!albumCoverPath) {
             return;
         }
 
-        const coverFileName = albumCover.split('/').pop();
-        const relativeCoverPath = `assets/covers/${coverFileName}`;
-
         const img = new Image();
-        img.src = `${relativeCoverPath}?t=${Date.now()}`;
+        img.src = `${albumCoverPath}?t=${Date.now()}`;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -257,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         img.onerror = () => {
-            console.error('Failed to load image for color extraction:', relativeCoverPath);
+            console.error('Failed to load image for color extraction:', albumCoverPath);
             currentAlbumCoverColor = '#cfcfcf';
         };
     }

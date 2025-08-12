@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, app } from 'electron';
 import { 
     addAlbumToCollection, 
     getAlbumsFromCollection, 
@@ -7,10 +7,38 @@ import {
 } from '../utils/albumManager.js';
 import { BrowserWindow } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const isDev = process.argv.includes('--dev');
 
 export function registerIpcHandlers() {
+
+    ipcMain.handle('get-paths', async () => {
+        return {
+            assets: isDev 
+            ? path.join(__dirname, 'assets') 
+            : path.join(process.resourcesPath, 'assets'),
+            src: isDev 
+            ? __dirname 
+            : path.join(app.getAppPath(), 'src'),
+            utils: isDev 
+            ? path.join(__dirname, '../utils') 
+            : path.join(app.getAppPath(), 'utils'),
+            covers: isDev 
+            ? path.join(__dirname, 'assets', 'covers') 
+            : path.join(process.resourcesPath, 'assets', 'covers'),
+            icons: isDev 
+            ? path.join(__dirname, 'assets', 'icons') 
+            : path.join(process.resourcesPath, 'assets', 'icons'),
+            unknownCover: isDev
+            ? path.join(__dirname, 'assets', 'covers', 'unknown.png')
+            : path.join(process.resourcesPath, 'assets', 'covers', 'unknown.png'),
+            isDev: isDev
+        };
+    });
 
     ipcMain.handle('get-albums', async () => {
         try {
