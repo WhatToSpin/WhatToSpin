@@ -1,7 +1,6 @@
 {
   "name": "what-to-spin",
   "version": "0.1.0",
-  "type": "module",
   "main": "src/main.js",
   "homepage": ".",
   "author": "Ethan Burmane <ethanburmane@gmail.com>",
@@ -23,7 +22,7 @@
   "scripts": {
     "debug-build": "electron-builder --dir --publish=never",
     "start": "electron .",
-    "clear:run": "find src/assets/covers/ -type f ! -name 'unknown.png' -delete && find src/ -type f -name 'collection.json' -delete",
+    "clear:run": "rm -rf ~/Library/Application\\ Support/what-to-spin/covers/* && rm -f ~/Library/Application\\ Support/what-to-spin/collection.json",
     "clear:test": "[ -d test-results/ ] && rm -rf test-results/ ; [ -d playwright-report/ ] && rm -rf playwright-report/",
     "dev": "electron . --dev",
     "test": "playwright test",

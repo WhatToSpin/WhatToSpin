@@ -1,10 +1,6 @@
-import { test, expect } from '@playwright/test';
-import { _electron as electron } from 'playwright';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { test, expect } = require('@playwright/test');
+const { _electron: electron } = require('playwright');
+const path = require('path');
 
 test.describe('Edit Album Tests', () => {
     let electronApp;

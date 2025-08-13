@@ -1,15 +1,6 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-let registerIpcHandlers;
-async function loadModules() {
-    const ipcModule = await import('./registerIpcHandlers.js');
-    registerIpcHandlers = ipcModule.registerIpcHandlers;
-}
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
+const { registerIpcHandlers } = require('./registerIpcHandlers');
 
 async function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -30,7 +21,6 @@ async function createWindow() {
 }
 
 app.whenReady().then(async () => {
-    await loadModules();
     registerIpcHandlers();
     await createWindow();
 });

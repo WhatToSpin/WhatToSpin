@@ -1,9 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    const BASE_PATH = await window.electronAPI.getPaths().src;
-    const COVER_DIR = await window.electronAPI.getPaths().covers;
-    const UNKNOWN_COVER_PATH = await window.electronAPI.getPaths().unknownCover;
-
     const albumTitle = document.getElementById('albumTitle');
     const artistName = document.getElementById('artistName');
     const year = document.getElementById('year');
@@ -16,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
+
+    const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
     
     let albums = [];
     let currentIndex = 0;
@@ -66,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             setCoverImage(centerCover, current); // only set center cover
+            window.electronAPI.debug(current.coverPath);
             await setCoverColor(current.coverPath);
 
             return;
@@ -163,18 +162,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function setCoverImage(imgElement, album) {
         if (!album || !album.coverPath) {
-            imgElement.src = UNKNOWN_COVER_PATH;
+            imgElement.src = `file://${UNKNOWN_COVER_PATH}`;
             imgElement.alt = 'No cover available';
             return;
         }
         
         let coverPath = album.coverPath;
-        imgElement.src = `${coverPath}?t=${Date.now()}`;
+        imgElement.src = `file://${coverPath}?t=${Date.now()}`;
         imgElement.alt = `${album.album} by ${album.artist}`;
         
         imgElement.onerror = function() {
             console.log(`Failed to load cover: ${coverPath}`);
-            this.src = UNKNOWN_COVER_PATH;
+            this.src = `file://${UNKNOWN_COVER_PATH}`;
             this.alt = 'Cover not found';
             this.style.display = 'none';
         };
@@ -190,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const img = new Image();
-        img.src = `${albumCoverPath}?t=${Date.now()}`;
+        img.src = `file://${albumCoverPath}?t=${Date.now()}`;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 

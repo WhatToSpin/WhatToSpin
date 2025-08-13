@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const albumDataString = urlParams.get('albumData');
     const albumCoverColor = decodeURIComponent(urlParams.get('albumCoverColor'));
@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const options = document.getElementById('options');
     const dropdownContent = document.getElementById('dropdownContent');
     const editLink = document.getElementById('edit');
+
+    const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
     
     let albumData = null; 
     if (albumDataString) {
@@ -13,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setFocusedAlbum(albumData);
     }
 
-    function setFocusedAlbum(albumData) {
+    async function setFocusedAlbum(albumData) {
         try {            
             document.getElementById('focusedAlbumTitle').textContent = albumData.album;
             document.getElementById('focusedArtistName').textContent = albumData.artist;
@@ -22,18 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const coverImg = document.getElementById('focusedCover');
 
             if (albumData.coverPath) {
-                const coverFileName = albumData.coverPath.split('/').pop();
-                const relativeCoverPath = `../assets/covers/${coverFileName}`;
+                const coverFilename = albumData.coverPath.split('/').pop();
+                const coverFilepath = await window.electronAPI.getCoverPath(coverFilename);
 
-                coverImg.src = `${relativeCoverPath}?t=${Date.now()}`;
+                coverImg.src = `file://${coverFilepath}?t=${Date.now()}`;
                 coverImg.alt = `${albumData.album} by ${albumData.artist}`;
                 
                 coverImg.onerror = () => {
-                    coverImg.src = '../assets/covers/unknown.png';
+                    coverImg.src = `file://${UNKNOWN_COVER_PATH}`;
                     coverImg.alt = 'Album cover not found';
                 };
             } else {
-                coverImg.src = '../assets/covers/unknown.png';
+                coverImg.src = `file://${UNKNOWN_COVER_PATH}`;
                 coverImg.alt = 'Album cover not found';
             }
         } catch (error) {
@@ -41,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('focusedAlbumTitle').textContent = 'Unknown Album';
             document.getElementById('focusedArtistName').textContent = 'Unknown Artist';
             document.getElementById('focusedYear').textContent = '';
-            document.getElementById('focusedCover').src = '../assets/covers/unknown.png';
+            document.getElementById('focusedCover').src = `file://${UNKNOWN_COVER_PATH}`;
         }
     }
     
@@ -82,6 +84,5 @@ document.addEventListener('DOMContentLoaded', () => {
         // set focused album with new data
         albumData = updatedAlbumData;
         setFocusedAlbum(updatedAlbumData);
-
     });
 });

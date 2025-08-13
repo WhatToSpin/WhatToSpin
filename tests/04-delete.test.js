@@ -1,5 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { _electron as electron } from 'playwright';
+const { test, expect } = require('@playwright/test');
+const { _electron: electron } = require('playwright');
+const { execSync } = require('child_process');
+const os = require('os');
+const path = require('path');
 
 test.describe('Delete Album Tests', () => {
     let electronApp;
@@ -28,6 +31,16 @@ test.describe('Delete Album Tests', () => {
         // close app
         await mainWindow.close();
         await electronApp.close();
+
+        // clean up files
+        const electronDataPath = path.join(os.homedir(), 'Library', 'Application Support', 'Electron');
+        console.log(electronDataPath);
+        try {
+            execSync(`rm -f "${electronDataPath}/collection.json"`);
+            execSync(`rm -rf "${electronDataPath}/covers/"`);
+        } catch (error) {
+            console.log(error);
+        }
     });
 
     async function openFocusPopup() {

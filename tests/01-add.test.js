@@ -1,17 +1,23 @@
-import { test, expect } from '@playwright/test';
-import { _electron as electron } from 'playwright';
-import { execSync } from 'child_process';
+const { test, expect } = require('@playwright/test');
+const { _electron: electron } = require('playwright');
+const { execSync } = require('child_process');
+const os = require('os');
+const path = require('path');
 
 test.describe('Add Album Tests', () => {
     let electronApp;
     let mainWindow;
 
     test.beforeAll(async () => {
-        // clear collection before testing
-        execSync(
-            "find src/assets/covers/ -type f ! -name 'unknown.png' -delete && \
-            find src/ -type f -name 'collection.json' -delete"
-        );
+
+        // clear albums first
+        const electronDataPath = path.join(os.homedir(), 'Library', 'Application Support', 'Electron');
+        try {
+            execSync(`rm -f "${electronDataPath}/collection.json"`);
+            execSync(`rm -rf "${electronDataPath}/covers/"`);
+        } catch (error) {
+            // ignore
+        }
 
         // launch app
         electronApp = await electron.launch({ 

@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { _electron as electron } from 'playwright';
+const { test, expect } = require('@playwright/test');
+const { _electron: electron } = require('playwright');
 
 test.describe('Movement Tests', () => {
     let electronApp;
@@ -18,6 +18,10 @@ test.describe('Movement Tests', () => {
         await expect(mainWindow.locator('#centerCover')).toBeVisible();
         await expect(mainWindow.locator('#rightCover')).toBeVisible();
         await expect(mainWindow.locator('#wayRightCover')).toBeVisible();
+
+        await mainWindow.waitForTimeout(1000);
+        const coverSrc = await mainWindow.locator('#centerCover').getAttribute('src');
+        console.log(`cover source: ${coverSrc}`);
 
         // check for album info
         await expect(mainWindow.locator('#albumTitle')).toContainText(/.+/gm)

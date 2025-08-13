@@ -1,24 +1,18 @@
-import fs from 'fs';
-import fsPromises from 'fs/promises';
-import path from 'path';
-import albumArt from 'album-art';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const COLLECTION_PATH = path.join(__dirname, '..', 'src', 'collection.json');
-const COVER_DIR = path.join(__dirname, '..', 'src', 'assets', 'covers');
-const UNKNOWN_COVER_PATH = path.join(COVER_DIR, 'unknown.png');
+const fs = require('fs');
+const fsPromises = require('fs/promises');
+const albumArt = require('album-art');
+const path = require('path');
+const filepath = require('./filepath');
 
 async function getAlbumsFromCollection() {
     let collection;
     try {
-        collection = await fsPromises.readFile(COLLECTION_PATH, 'utf-8');
+        collection = await fsPromises.readFile(path.join(filepath.userData, 'collection.json'), 'utf-8');
         collection = JSON.parse(collection);
     } catch (error) {
         collection = { albums: [] };
-        await fsPromises.mkdir(path.dirname(COLLECTION_PATH), { recursive: true });
-        await fsPromises.writeFile(COLLECTION_PATH, JSON.stringify(collection, null, 2));
+        await fsPromises.mkdir(path.dirname(path.join(filepath.userData, 'collection.json')), { recursive: true });
+        await fsPromises.writeFile(path.join(filepath.userData, 'collection.json'), JSON.stringify(collection, null, 2));
     }
     return collection;
 }
@@ -63,7 +57,7 @@ async function addAlbumToCollection(albumData) {
 
         let coverPath = await getAlbumCover(album, artist);
         if (!coverPath) {
-            coverPath = UNKNOWN_COVER_PATH;
+            coverPath = filepath.unknownCover;
         }
 
         const newAlbum = {
@@ -77,7 +71,7 @@ async function addAlbumToCollection(albumData) {
         collection = await sortCollection(collection);
 
         await fsPromises.writeFile(
-            COLLECTION_PATH,
+            path.join(filepath.userData, 'collection.json'),
             JSON.stringify(collection, null, 2)
         );
 
@@ -138,8 +132,8 @@ async function saveAlbumCover(album, artist, cover) {
     }
 
     // make sure cover directory exists
-    if (!fs.existsSync(COVER_DIR)) {
-        fs.mkdirSync(COVER_DIR, { recursive: true });
+    if (!fs.existsSync(path.join(filepath.userData, 'covers'))) {
+        fs.mkdirSync(path.join(filepath.userData, 'covers'), { recursive: true });
     }
 
     const coverUrl = cover['#text'];
@@ -178,13 +172,13 @@ async function deleteAlbumFromCollection(albumData) {
     collection.albums.splice(albumIndex, 1);
 
     // delete the cover image
-    if (coverPath && fs.existsSync(coverPath) && coverPath !== UNKNOWN_COVER_PATH) {
+    if (coverPath && fs.existsSync(coverPath) && coverPath !== filepath.unknownCover) {
         fs.unlinkSync(coverPath);
     }
     
     // write updated collection
     await fsPromises.writeFile(
-        COLLECTION_PATH,
+        path.join(filepath.userData, 'collection.json'),
         JSON.stringify(collection, null, 2)
     );
 
@@ -245,7 +239,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
 
     // rewrite to collection.json
     await fsPromises.writeFile(
-        COLLECTION_PATH,
+        path.join(filepath.userData, 'collection.json'),
         JSON.stringify(collection, null, 2)
     );
 
@@ -258,12 +252,12 @@ async function generateCoverPath(album, artist) {
     const randomId = Math.floor(Math.random() * 1000000).toString();
 
     const filename = `${artistSafe}_${albumSafe}_${randomId}.png`;
-    const coverPath = path.join(COVER_DIR, filename);
+    const coverPath = path.join(path.join(filepath.userData, 'covers'), filename);
 
     return coverPath;
 }
 
-export {
+module.exports = {
     addAlbumToCollection,
     getAlbumsFromCollection, 
     deleteAlbumFromCollection,

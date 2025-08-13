@@ -33,73 +33,69 @@ button, .cover, .shuffle-icon, .add-icon {
     color: #666;
     object-fit: cover; 
     overflow: hidden;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.3));
 }
 
 .cover.center {
     transform: scale(1);
     z-index: 3;
-    /* display: none; */
+    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.3));
 }
 
 .cover.center:hover {
     transform: scale(1) translateY(-5px);
+    filter: drop-shadow(0 14px 6px rgba(0, 0, 0, 0.3));
 }
 
 .cover.left {
     transform: scale(0.8) translateX(-150px);
     z-index: 2;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.2));
-    filter: brightness(0.8);
+    filter: brightness(0.8) drop-shadow(0 8px 4px rgba(0, 0, 0, 0.3));
     cursor: pointer;
     display: none;
 }
 
 .cover.left:hover {
     transform: scale(0.8) translateX(-150px) translateY(-10px);
-    filter: brightness(1);
+    filter: brightness(1) drop-shadow(0 14px 6px rgba(0, 0, 0, 0.3));
 }
 
 .cover.right {
     transform: scale(0.8) translateX(150px);
     z-index: 2;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.2));
-    filter: brightness(0.8);
+    filter: brightness(0.8) drop-shadow(0 8px 4px rgba(0, 0, 0, 0.3));
     cursor: pointer;
     display: none;
 }
 
 .cover.right:hover {
     transform: scale(0.8) translateX(150px) translateY(-10px);
-    filter: brightness(1);
+    filter: brightness(1) drop-shadow(0 14px 6px rgba(0, 0, 0, 0.3));
 }
 
 .cover.way-left {
     transform: scale(0.6) translateX(-350px);
     z-index: 1;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.1));
-    filter: brightness(0.6);
+    filter: brightness(0.6) drop-shadow(0 6px 3px rgba(0, 0, 0, 0.3));
     cursor: pointer;
     display: none;
 }
 
 .cover.way-left:hover {
     transform: scale(0.6) translateX(-350px) translateY(-10px);
-    filter: brightness(1);
+    filter: brightness(1) drop-shadow(0 12px 6px rgba(0, 0, 0, 0.3));
 }
 
 .cover.way-right {
     transform: scale(0.6) translateX(350px);
     z-index: 1;
-    filter: drop-shadow(0 10px 4px rgba(0, 0, 0, 0.1));
-    filter: brightness(0.6);
+    filter: brightness(0.6) drop-shadow(0 6px 3px rgba(0, 0, 0, 0.3));
     cursor: pointer;
     display: none;
 }
 
 .cover.way-right:hover {
     transform: scale(0.6) translateX(350px) translateY(-10px);
-    filter: brightness(1);
+    filter: brightness(1) drop-shadow(0 12px 6px rgba(0, 0, 0, 0.3));
 }
 
 .album-info-container {

@@ -1,6 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
 const albumCoverColor = decodeURIComponent(urlParams.get('albumCoverColor'));  
-const MAX_COVER_DIMENSION = 1000; // 1000x1000
+const MAX_COVER_DIMENSION = 1000; // 1000 x 1000
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 if (albumCoverColor) {
@@ -30,7 +30,7 @@ if (albumCoverColor) {
     document.head.appendChild(style);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const oldAlbumDataString = urlParams.get('albumData');  
 
     const saveButton = document.getElementById('saveChanges');
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editCover = document.getElementById('editCover');
     const coverInput = document.getElementById('coverInput');
 
-    const UNKNOWN_COVER_PATH = '../assets/covers/unknown.png';
+    const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
     let newCoverData = null; // if new cover uploaded
     
     if (oldAlbumDataString) {
@@ -53,18 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const coverImg = document.getElementById('editCover');
 
             if (oldAlbumData.coverPath && oldAlbumData.coverPath !== UNKNOWN_COVER_PATH) {
-                const coverFileName = oldAlbumData.coverPath.split('/').pop();
-                const relativeCoverPath = `../assets/covers/${coverFileName}`;
+                const coverFilename = oldAlbumData.coverPath.split('/').pop();
+                const relativeCoverPath = await window.electronAPI.getCoverPath(coverFilename);
                 
-                coverImg.src = relativeCoverPath;
+                coverImg.src = `file://${relativeCoverPath}`;
                 coverImg.alt = `${oldAlbumData.album} by ${oldAlbumData.artist}`;
                 
                 coverImg.onerror = () => {
-                    coverImg.src = '../assets/covers/unknown.png';
+                    coverImg.src = `file://${UNKNOWN_COVER_PATH}`;
                     coverImg.alt = 'Album cover not found';
                 };
             } else {
-                coverImg.src = UNKNOWN_COVER_PATH;
+                coverImg.src = `file://${UNKNOWN_COVER_PATH}`;
                 coverImg.alt = 'Album cover not found';
             }
         } catch (error) {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('editAlbumTitle').textContent = 'Unknown Album';
             document.getElementById('editArtistName').textContent = 'Unknown Artist';
             document.getElementById('editYear').textContent = 'Unknown Year';
-            document.getElementById('editCover').src = '../assets/covers/unknown.png';
+            document.getElementById('editCover').src = `file://${UNKNOWN_COVER_PATH}`;
         }
     }
     

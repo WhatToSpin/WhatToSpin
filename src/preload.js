@@ -1,7 +1,10 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    getPaths: () => ipcRenderer.invoke('get-paths'),
+
+    getCoverPath: (filename) => ipcRenderer.invoke('get-cover-path', filename),
+
+    getUnknownCoverPath: () => ipcRenderer.invoke('get-unknown-cover-path'),
 
     getAlbumsFromCollection: () => ipcRenderer.invoke('get-albums'),
 
