@@ -19,8 +19,8 @@ const filepath = {
   icons: isDev ? path.join(__dirname, '../src/assets/icons') : path.join(app.getAppPath(), 'src/assets/icons'),
   
   unknownCover: isDev 
-    ? path.join(__dirname, '../src/assets/covers/unknown.png')
-    : path.join(app.getAppPath(), 'src/assets/covers/unknown.png'),
+    ? path.join(__dirname, '../src/assets/unknown.png')
+    : path.join(app.getAppPath(), 'src/assets/unknown.png'),
   
   userData: app.getPath('userData'),
   get userCovers() { 

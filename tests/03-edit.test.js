@@ -203,7 +203,7 @@ test.describe('Edit Album Tests', () => {
         await editPopup.waitForTimeout(1000);
 
         // change cover
-        const newCoverPath = path.join(__dirname, '..', 'src', 'assets', 'covers', 'unknown.png');
+        const newCoverPath = path.join(__dirname, '..', 'src', 'assets', 'unknown.png');
         await editPopup.locator('#coverInput').setInputFiles(newCoverPath);
         await editPopup.waitForTimeout(1000);
 

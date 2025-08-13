@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             setCoverImage(centerCover, current); // only set center cover
-            window.electronAPI.debug(current.coverPath);
             await setCoverColor(current.coverPath);
 
             return;

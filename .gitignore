@@ -57,7 +57,7 @@ playwright-report
 
 # dont ignore 
 !src/assets/images/*
-!src/assets/covers/unknown.png
+!src/assets/unknown.png
 !build/*.png
 !build/*.ico
 !build/*.icns
