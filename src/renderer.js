@@ -271,10 +271,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // show focused album after 500 ms
                 setTimeout(async () => {
                     try {
-                        await window.electronAPI.openAlbumFocusPopup(albums[currentIndex], currentAlbumCoverColor);
+                        await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
                     } catch (error) {
-                        console.error('Error opening album focus popup:', error);
-                        alert('Failed to open album focus popup. Please try again.');
+                        console.error('Error opening album focus window:', error);
+                        alert('Failed to open album focus window. Please try again.');
                     }
 
                 }, 500);
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addAlbumButton.addEventListener('click', async () => {
         try {
-            await window.electronAPI.openAddAlbumPopup(currentAlbumCoverColor);
+            await window.electronAPI.openAddAlbumWindow(currentAlbumCoverColor);
         } catch (error) {
             console.error('Error adding album:', error);
             alert(`Failed to add album. Please try again. Error: ${error.message}`);
@@ -294,10 +294,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     centerCover.addEventListener('click', async () => {
         if (albums.length === 0) return;
         try {
-            await window.electronAPI.openAlbumFocusPopup(albums[currentIndex], currentAlbumCoverColor);
+            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
         } catch (error) {
-            console.error('Error opening album focus popup:', error);
-            alert('Failed to open album focus popup. Please try again.');
+            console.error('Error opening album focus window:', error);
+            alert('Failed to open album focus window. Please try again.');
         }
     });
 

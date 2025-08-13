@@ -43,27 +43,27 @@ test.describe('Delete Album Tests', () => {
         }
     });
 
-    async function openFocusPopup() {
-        const popupPromise = electronApp.waitForEvent('window');
+    async function openFocusWindow() {
+        const windowPromise = electronApp.waitForEvent('window');
         await mainWindow.locator('#centerCover').click();
-        const popupWindow = await popupPromise;
-        await popupWindow.waitForLoadState('domcontentloaded');
-        return popupWindow;
+        const focusWindow = await windowPromise;
+        await focusWindow.waitForLoadState('domcontentloaded');
+        return focusWindow;
     }
 
-    async function openEditPopup(focusPopup) {
-        const popupPromise = electronApp.waitForEvent('window');
-        await focusPopup.locator('#options').click();
-        await focusPopup.locator('#edit').click();
-        const editPopup = await popupPromise;
-        await editPopup.waitForLoadState('domcontentloaded');
-        return editPopup;
+    async function openEditWindow(focusWindow) {
+        const windowPromise = electronApp.waitForEvent('window');
+        await focusWindow.locator('#options').click();
+        await focusWindow.locator('#edit').click();
+        const editWindow = await windowPromise;
+        await editWindow.waitForLoadState('domcontentloaded');
+        return editWindow;
     }
 
     async function deleteAlbum() {
-        const focusPopup = await openFocusPopup();
-        const editPopup = await openEditPopup(focusPopup);
-        await editPopup.locator('#deleteAlbum').click();
+        const focusWindow = await openFocusWindow();
+        const editWindow = await openEditWindow(focusWindow);
+        await editWindow.locator('#deleteAlbum').click();
     }
 
     async function isCoverVisible(wayLeft, left, center, right, wayRight) {

@@ -64,23 +64,23 @@ test.describe('Movement Tests', () => {
 
     test('Shuffle albums', async () => {
 
-        // expect album focus popup
-        const popupPromise = electronApp.waitForEvent('window');
+        // expect album focus window
+        const windowPromise = electronApp.waitForEvent('window');
 
         // shuffle albums
         await mainWindow.locator('#shuffleButton').click();
         await mainWindow.waitForTimeout(3500); // shuffle is 1 - 3 seconds
 
         // check that an album is focused
-        const popupWindow = await popupPromise;
-        await popupWindow.waitForLoadState('domcontentloaded');
+        const focusWindow = await windowPromise;
+        await focusWindow.waitForLoadState('domcontentloaded');
 
         // check for album info
-        await expect(popupWindow.locator('#focusedCover')).toBeVisible();
-        await expect(popupWindow.locator('#focusedAlbumTitle')).toContainText(/.+/gm);
-        await expect(popupWindow.locator('#focusedArtistName')).toContainText(/.+/gm);
+        await expect(focusWindow.locator('#focusedCover')).toBeVisible();
+        await expect(focusWindow.locator('#focusedAlbumTitle')).toContainText(/.+/gm);
+        await expect(focusWindow.locator('#focusedArtistName')).toContainText(/.+/gm);
 
-        // close popup
-        await popupWindow.close();
+        // close window
+        await focusWindow.close();
     });
 });

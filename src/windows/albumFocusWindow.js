@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     editLink.addEventListener('click', () => {
-        window.electronAPI.openEditAlbumPopup(albumData, albumCoverColor);
+        window.electronAPI.openEditAlbumWindow(albumData, albumCoverColor);
         dropdownContent.classList.remove('show');
     });
 

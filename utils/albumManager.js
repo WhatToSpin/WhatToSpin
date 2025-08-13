@@ -105,27 +105,21 @@ async function getAlbumCover(album, artist) {
     }
 
     try {
-        console.log("TEST1")
-
         const coverUrl = await albumArt(artist, { album: album, size: 'large' });
         if (!coverUrl) {
             console.log("coverUrl is null");
             return null;
         }
-        console.log("TEST2")
-
 
         // checking cover;
         const response = await fetch(coverUrl);
         if (!response.ok) {
             return null;
         }
-        console.log("TEST3")
 
-
+        // saving cover
         const cover = { '#text': coverUrl };
         const coverPath = await saveAlbumCover(album, artist, cover);
-        console.log("TEST4\n")
 
         return coverPath;
     } catch (error) {

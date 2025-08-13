@@ -33,21 +33,21 @@ test.describe('Add Album Tests', () => {
     });
 
     async function addAlbumToCollection(albumData) {
-        // open add album popup
-        const popupPromise = electronApp.waitForEvent('window');
+        // open add album window
+        const windowPromise = electronApp.waitForEvent('window');
         await expect(mainWindow.locator('#addAlbumButton')).toBeVisible();
         await mainWindow.locator('#addAlbumButton').click();
-        const popupWindow = await popupPromise;
-        await popupWindow.waitForLoadState('domcontentloaded');
+        const addWindow = await windowPromise;
+        await addWindow.waitForLoadState('domcontentloaded');
 
         // fill in album details
-        await popupWindow.locator('#album-name').fill(albumData.album);
-        await popupWindow.locator('#artist-name').fill(albumData.artist);
-        await popupWindow.locator('#year-released').fill(albumData.year);
+        await addWindow.locator('#album-name').fill(albumData.album);
+        await addWindow.locator('#artist-name').fill(albumData.artist);
+        await addWindow.locator('#year-released').fill(albumData.year);
 
         // click add album button
-        await popupWindow.locator('#submit-button').click();
-        await popupWindow.waitForEvent('close');
+        await addWindow.locator('#submit-button').click();
+        await addWindow.waitForEvent('close');
     }
 
     async function isCoverVisible(wayLeft, left, center, right, wayRight) {
@@ -123,25 +123,25 @@ test.describe('Add Album Tests', () => {
     })
 
     test('Missing information', async () => {
-        // open add album popup
-        const popupPromise = electronApp.waitForEvent('window');
+        // open add album window
+        const windowPromise = electronApp.waitForEvent('window');
         await expect(mainWindow.locator('#addAlbumButton')).toBeVisible();
         await mainWindow.locator('#addAlbumButton').click();
-        const popupWindow = await popupPromise;
-        await popupWindow.waitForLoadState('domcontentloaded');
+        const addWindow = await windowPromise;
+        await addWindow.waitForLoadState('domcontentloaded');
 
         // track error
         let alertMessage = '';
         let alertReceived = false;
-        popupWindow.on('dialog', async dialog => {
+        addWindow.on('dialog', async dialog => {
             alertMessage = dialog.message();
             alertReceived = true;
             await dialog.accept();
         });
 
         // click add album button (wait for error)
-        await popupWindow.locator('#submit-button').click();
-        await popupWindow.waitForTimeout(500);
+        await addWindow.locator('#submit-button').click();
+        await addWindow.waitForTimeout(500);
 
         // check error
         expect(alertReceived).toBe(true);
@@ -149,30 +149,30 @@ test.describe('Add Album Tests', () => {
     });
 
     test('Album already exists', async () => {
-        // open add album popup
-        const popupPromise = electronApp.waitForEvent('window');
+        // open add album window
+        const windowPromise = electronApp.waitForEvent('window');
         await expect(mainWindow.locator('#addAlbumButton')).toBeVisible();
         await mainWindow.locator('#addAlbumButton').click();
-        const popupWindow = await popupPromise;
-        await popupWindow.waitForLoadState('domcontentloaded');
+        const addWindow = await windowPromise;
+        await addWindow.waitForLoadState('domcontentloaded');
 
         // track error
         let alertMessage = '';
         let alertReceived = false;
-        popupWindow.on('dialog', async dialog => {
+        addWindow.on('dialog', async dialog => {
             alertMessage = dialog.message();
             alertReceived = true;
             await dialog.accept();
         });
 
         // fill in album details
-        await popupWindow.locator('#album-name').fill('Let It Be');
-        await popupWindow.locator('#artist-name').fill('The Beatles');
-        await popupWindow.locator('#year-released').fill('1969');
+        await addWindow.locator('#album-name').fill('Let It Be');
+        await addWindow.locator('#artist-name').fill('The Beatles');
+        await addWindow.locator('#year-released').fill('1969');
 
         // click add album button (wait for error)
-        await popupWindow.locator('#submit-button').click();
-        await popupWindow.waitForTimeout(500);
+        await addWindow.locator('#submit-button').click();
+        await addWindow.waitForTimeout(500);
 
         // check error
         expect(alertReceived).toBe(true);

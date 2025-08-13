@@ -76,37 +76,37 @@ function registerIpcHandlers() {
     });
 
     ipcMain.handle('notify-album-added', async (event, albumData) => {
-        const addAlbumPopup = BrowserWindow.fromWebContents(event.sender);
-        const mainWindow = addAlbumPopup.getParentWindow();
+        const addAlbumWindow = BrowserWindow.fromWebContents(event.sender);
+        const mainWindow = addAlbumWindow.getParentWindow();
 
         mainWindow.webContents.send('album-was-added', albumData);
         return { success: true };
     });
 
     ipcMain.handle('notify-album-update', async (event, updatedAlbumData) => {
-        const editAlbumPopup = BrowserWindow.fromWebContents(event.sender);
-        const albumFocus = editAlbumPopup.getParentWindow();
+        const editAlbumWindow = BrowserWindow.fromWebContents(event.sender);
+        const albumFocus = editAlbumWindow.getParentWindow();
 
         albumFocus.webContents.send('album-was-updated', updatedAlbumData);
         return { success: true };
     });
 
-    ipcMain.handle('open-add-album-popup', async (event, currentAlbumCoverColor) => {
+    ipcMain.handle('open-add-album-window', async (event, currentAlbumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         
         const [mainX, mainY] = mainWindow.getPosition();
         const [mainWidth, mainHeight] = mainWindow.getSize();
         
-        const popupWidth = 400;
-        const popupHeight = 300;
-        const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
-        const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
+        const windowWidth = 400;
+        const windowHeight = 300;
+        const windowX = mainX + Math.floor((mainWidth - windowWidth) / 2);
+        const windowY = mainY + Math.floor((mainHeight - windowHeight) / 2);
         
         let addAlbumWindow = new BrowserWindow({
-            width: popupWidth,
-            height: popupHeight,
-            x: popupX,
-            y: popupY,
+            width: windowWidth,
+            height: windowHeight,
+            x: windowX,
+            y: windowY,
             resizable: false,
             movable: false,
             frame: false,
@@ -120,7 +120,7 @@ function registerIpcHandlers() {
         });
 
         const encodedColor = encodeURIComponent(currentAlbumCoverColor || '#cfcfcf');
-        addAlbumWindow.loadFile(path.join(__dirname, './popups/addAlbumPopup.html'), { 
+        addAlbumWindow.loadFile(path.join(__dirname, './windows/addAlbumWindow.html'), { 
             query: { currentAlbumCoverColor: encodedColor } 
         });
 
@@ -129,22 +129,22 @@ function registerIpcHandlers() {
         });
     });
 
-    ipcMain.handle('open-album-focus-popup', async (event, albumData, albumCoverColor) => {
+    ipcMain.handle('open-album-focus-window', async (event, albumData, albumCoverColor) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
 
         const [mainX, mainY] = mainWindow.getPosition();
         const [mainWidth, mainHeight] = mainWindow.getSize();
 
-        const popupWidth = 300;
-        const popupHeight = 400;
-        const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
-        const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
+        const windowWidth = 300;
+        const windowHeight = 400;
+        const windowX = mainX + Math.floor((mainWidth - windowWidth) / 2);
+        const windowY = mainY + Math.floor((mainHeight - windowHeight) / 2);
 
         let albumFocusWindow = new BrowserWindow({
-            width: popupWidth,
-            height: popupHeight,
-            x: popupX,
-            y: popupY,
+            width: windowWidth,
+            height: windowHeight,
+            x: windowX,
+            y: windowY,
             resizable: false,
             movable: false,
             frame: false,
@@ -157,7 +157,7 @@ function registerIpcHandlers() {
             }
         });
 
-        albumFocusWindow.loadFile(path.join(__dirname, './popups/albumFocusPopup.html'), {
+        albumFocusWindow.loadFile(path.join(__dirname, './windows/albumFocusWindow.html'), {
             query: { 
                 albumData: JSON.stringify(albumData), 
                 albumCoverColor: encodeURIComponent(albumCoverColor) 
@@ -169,23 +169,23 @@ function registerIpcHandlers() {
         });
     });
 
-    ipcMain.handle('open-edit-album-popup', async (event, albumData, albumCoverColor) => {
+    ipcMain.handle('open-edit-album-window', async (event, albumData, albumCoverColor) => {
         const albumFocusWindow = BrowserWindow.fromWebContents(event.sender);
         const mainWindow = albumFocusWindow.getParentWindow();
 
         const [mainX, mainY] = mainWindow.getPosition();
         const [mainWidth, mainHeight] = mainWindow.getSize();
 
-        const popupWidth = 300;
-        const popupHeight = 400;
-        const popupX = mainX + Math.floor((mainWidth - popupWidth) / 2);
-        const popupY = mainY + Math.floor((mainHeight - popupHeight) / 2);
+        const windowWidth = 300;
+        const windowHeight = 400;
+        const windowX = mainX + Math.floor((mainWidth - windowWidth) / 2);
+        const windowY = mainY + Math.floor((mainHeight - windowHeight) / 2);
 
         let editAlbumWindow = new BrowserWindow({
-            width: popupWidth,
-            height: popupHeight,
-            x: popupX,
-            y: popupY,
+            width: windowWidth,
+            height: windowHeight,
+            x: windowX,
+            y: windowY,
             resizable: false,
             movable: false,
             frame: false,
@@ -198,7 +198,7 @@ function registerIpcHandlers() {
             }
         });
 
-        editAlbumWindow.loadFile(path.join(__dirname, './popups/editAlbumPopup.html'), {
+        editAlbumWindow.loadFile(path.join(__dirname, './windows/editAlbumWindow.html'), {
             query: { 
                 albumData: JSON.stringify(albumData),
                 albumCoverColor: encodeURIComponent(albumCoverColor)

@@ -31,81 +31,81 @@ test.describe('Edit Album Tests', () => {
         await electronApp.close();
     });
 
-    async function openFocusPopup() {
-        const popupPromise = electronApp.waitForEvent('window');
+    async function openFocusWindow() {
+        const windowPromise = electronApp.waitForEvent('window');
         await mainWindow.locator('#centerCover').click();
-        const popupWindow = await popupPromise;
-        await popupWindow.waitForLoadState('domcontentloaded');
-        return popupWindow;
+        const focusWindow = await windowPromise;
+        await focusWindow.waitForLoadState('domcontentloaded');
+        return focusWindow;
     }
 
-    async function openEditPopup(focusPopup) {
-        const popupPromise = electronApp.waitForEvent('window');
-        await focusPopup.locator('#options').click();
-        await focusPopup.locator('#edit').click();
-        const editPopup = await popupPromise;
-        await editPopup.waitForLoadState('domcontentloaded');
-        return editPopup;
+    async function openEditWindow(focusWindow) {
+        const windowPromise = electronApp.waitForEvent('window');
+        await focusWindow.locator('#options').click();
+        await focusWindow.locator('#edit').click();
+        const editWindow = await windowPromise;
+        await editWindow.waitForLoadState('domcontentloaded');
+        return editWindow;
     }
 
     test('Open dropdown menu', async () => {
         // open album focus 
-        const popupWindow = await openFocusPopup();
+        const focusWindow = await openFocusWindow();
 
         // press options button
-        await expect(popupWindow.locator('#options')).toBeVisible();
-        await expect(popupWindow.locator('#dropdownContent')).toBeHidden();
-        await popupWindow.locator('#options').click();
-        await expect(popupWindow.locator('#dropdownContent')).toBeVisible();
+        await expect(focusWindow.locator('#options')).toBeVisible();
+        await expect(focusWindow.locator('#dropdownContent')).toBeHidden();
+        await focusWindow.locator('#options').click();
+        await expect(focusWindow.locator('#dropdownContent')).toBeVisible();
 
         // click button again to hide
-        await popupWindow.locator('#options').click();
-        await expect(popupWindow.locator('#dropdownContent')).toBeHidden();
+        await focusWindow.locator('#options').click();
+        await expect(focusWindow.locator('#dropdownContent')).toBeHidden();
 
         // press options button
-        await expect(popupWindow.locator('#dropdownContent')).toBeHidden();
-        await popupWindow.locator('#options').click();
-        await expect(popupWindow.locator('#dropdownContent')).toBeVisible();
+        await expect(focusWindow.locator('#dropdownContent')).toBeHidden();
+        await focusWindow.locator('#options').click();
+        await expect(focusWindow.locator('#dropdownContent')).toBeVisible();
 
         // click off menu to hide
-        await popupWindow.mouse.click(200, 150);
-        await expect(popupWindow.locator('#dropdownContent')).toBeHidden();
+        await focusWindow.mouse.click(200, 150);
+        await expect(focusWindow.locator('#dropdownContent')).toBeHidden();
 
         // close album focus
-        await popupWindow.close();
+        await focusWindow.close();
     });
 
     test('Open edit album menu', async () => {
-        // open album edit popup
-        const focusPopup = await openFocusPopup();
-        const editPopup = await openEditPopup(focusPopup);
+        // open album edit window
+        const focusWindow = await openFocusWindow();
+        const editWindow = await openEditWindow(focusWindow);
 
         // check content editable
-        await expect(editPopup.locator('#editAlbumTitle')).toHaveAttribute('contenteditable', 'true');
-        await expect(editPopup.locator('#editArtistName')).toHaveAttribute('contenteditable', 'true');
-        await expect(editPopup.locator('#editYear')).toHaveAttribute('contenteditable', 'true');
+        await expect(editWindow.locator('#editAlbumTitle')).toHaveAttribute('contenteditable', 'true');
+        await expect(editWindow.locator('#editArtistName')).toHaveAttribute('contenteditable', 'true');
+        await expect(editWindow.locator('#editYear')).toHaveAttribute('contenteditable', 'true');
 
         // close both windows
-        await editPopup.close();
-        await focusPopup.close();
+        await editWindow.close();
+        await focusWindow.close();
     }); 
 
-    test('Check edit album popup content', async () => {
-        // open album foucs popup
-        const focusPopup = await openFocusPopup();
+    test('Check edit album window content', async () => {
+        // open album foucs window
+        const focusWindow = await openFocusWindow();
 
         // get focus album info
-        const focusAlbumName = await focusPopup.locator('#focusedAlbumTitle').textContent();
-        const focusArtistName = await focusPopup.locator('#focusedArtistName').textContent();
-        const focusYearReleased = await focusPopup.locator('#focusedYear').textContent();
+        const focusAlbumName = await focusWindow.locator('#focusedAlbumTitle').textContent();
+        const focusArtistName = await focusWindow.locator('#focusedArtistName').textContent();
+        const focusYearReleased = await focusWindow.locator('#focusedYear').textContent();
 
-        // open album edit popup
-        const editPopup = await openEditPopup(focusPopup);
+        // open album edit window
+        const editWindow = await openEditWindow(focusWindow);
 
         // get edit album info
-        const editAlbumName = await editPopup.locator('#editAlbumTitle').textContent();
-        const editArtistName = await editPopup.locator('#editArtistName').textContent();
-        const editYearReleased = await editPopup.locator('#editYear').textContent();
+        const editAlbumName = await editWindow.locator('#editAlbumTitle').textContent();
+        const editArtistName = await editWindow.locator('#editArtistName').textContent();
+        const editYearReleased = await editWindow.locator('#editYear').textContent();
 
         // compare 
         expect(editAlbumName).toBe(focusAlbumName);
@@ -113,76 +113,76 @@ test.describe('Edit Album Tests', () => {
         expect(editYearReleased).toBe(focusYearReleased);
 
         // close both windows
-        await editPopup.close();
-        await focusPopup.close();
+        await editWindow.close();
+        await focusWindow.close();
     });
 
     test('Edit album name', async () => {
-        // open album edit popup
-        const focusPopup = await openFocusPopup();
-        const editPopup = await openEditPopup(focusPopup);
+        // open album edit window
+        const focusWindow = await openFocusWindow();
+        const editWindow = await openEditWindow(focusWindow);
 
         // fill in new info
-        await editPopup.locator('#editAlbumTitle').fill("Rubber Soul"); 
+        await editWindow.locator('#editAlbumTitle').fill("Rubber Soul"); 
 
         // save changes
-        await editPopup.locator('#saveChanges').click();
+        await editWindow.locator('#saveChanges').click();
 
-        // check that focus popup info is correct
-        await expect(focusPopup.locator('#focusedAlbumTitle')).toContainText("Rubber Soul");
+        // check that focus window info is correct
+        await expect(focusWindow.locator('#focusedAlbumTitle')).toContainText("Rubber Soul");
 
-        // close focus popup
-        await focusPopup.close();
+        // close focus window
+        await focusWindow.close();
 
         // check that main window info is correct
         await expect(mainWindow.locator('#albumTitle')).toContainText("Rubber Soul");
     });
 
     test('Edit album year', async () => {
-        // open album edit popup
-        const focusPopup = await openFocusPopup();
-        const editPopup = await openEditPopup(focusPopup);
+        // open album edit window
+        const focusWindow = await openFocusWindow();
+        const editWindow = await openEditWindow(focusWindow);
 
         // fill in new info
-        await editPopup.locator('#editYear').fill("1965");
+        await editWindow.locator('#editYear').fill("1965");
 
         // save changes
-        await editPopup.locator('#saveChanges').click();
+        await editWindow.locator('#saveChanges').click();
 
-        // check that focus popup info is correct
-        await expect(focusPopup.locator('#focusedYear')).toContainText("1965");
+        // check that focus window info is correct
+        await expect(focusWindow.locator('#focusedYear')).toContainText("1965");
 
-        // close focus popup
-        await focusPopup.close();
+        // close focus window
+        await focusWindow.close();
 
         // check that main window info is correct
         await expect(mainWindow.locator('#year')).toContainText("1965");
     });
 
     test('Unsaved edits', async () => {
-        // open album focus popup
-        const focusPopup = await openFocusPopup();
+        // open album focus window
+        const focusWindow = await openFocusWindow();
 
         // get album info
-        const albumTitle = await focusPopup.locator('#focusedAlbumTitle').textContent();
-        const yearReleased = await focusPopup.locator('#focusedYear').textContent();
+        const albumTitle = await focusWindow.locator('#focusedAlbumTitle').textContent();
+        const yearReleased = await focusWindow.locator('#focusedYear').textContent();
 
-        // open album edit popup
-        const editPopup = await openEditPopup(focusPopup);
+        // open album edit window
+        const editWindow = await openEditWindow(focusWindow);
     
         // fill in new info
-        await editPopup.locator('#editAlbumTitle').fill("A Hard Days Night"); 
-        await editPopup.locator('#editYear').fill("1964")
+        await editWindow.locator('#editAlbumTitle').fill("A Hard Days Night"); 
+        await editWindow.locator('#editYear').fill("1964")
 
-        // exit edit popup (without saving changes)
-        await editPopup.close();
+        // exit edit window (without saving changes)
+        await editWindow.close();
         
-        // check that focus popup info is correct
-        await expect(focusPopup.locator('#focusedAlbumTitle')).toContainText(albumTitle);
-        await expect(focusPopup.locator('#focusedYear')).toContainText(yearReleased);
+        // check that focus window info is correct
+        await expect(focusWindow.locator('#focusedAlbumTitle')).toContainText(albumTitle);
+        await expect(focusWindow.locator('#focusedYear')).toContainText(yearReleased);
 
-        // close focus popup
-        await focusPopup.close();
+        // close focus window
+        await focusWindow.close();
 
         // check that main window info is correct
         await expect(mainWindow.locator('#albumTitle')).toContainText(albumTitle);
@@ -190,35 +190,35 @@ test.describe('Edit Album Tests', () => {
     })
 
     test('Edit album cover', async () => {
-        // open album focus popup
-        const focusPopup = await openFocusPopup();
+        // open album focus window
+        const focusWindow = await openFocusWindow();
 
         // capture old cover screenshot as buffer for comparison
-        const oldCover = focusPopup.locator('#focusedCover');
+        const oldCover = focusWindow.locator('#focusedCover');
         const oldCoverScreenshot = await oldCover.screenshot();
-        await focusPopup.waitForTimeout(1000);
+        await focusWindow.waitForTimeout(1000);
 
-        // open album edit popup
-        const editPopup = await openEditPopup(focusPopup);
-        await editPopup.waitForTimeout(1000);
+        // open album edit window
+        const editWindow = await openEditWindow(focusWindow);
+        await editWindow.waitForTimeout(1000);
 
         // change cover
         const newCoverPath = path.join(__dirname, '..', 'src', 'assets', 'unknown.png');
-        await editPopup.locator('#coverInput').setInputFiles(newCoverPath);
-        await editPopup.waitForTimeout(1000);
+        await editWindow.locator('#coverInput').setInputFiles(newCoverPath);
+        await editWindow.waitForTimeout(1000);
 
         // save changes
-        await editPopup.locator('#saveChanges').click();
+        await editWindow.locator('#saveChanges').click();
 
-        // check that focus popup cover has changed
-        await focusPopup.waitForTimeout(1000);
-        const newCover = focusPopup.locator('#focusedCover');
+        // check that focus window cover has changed
+        await focusWindow.waitForTimeout(1000);
+        const newCover = focusWindow.locator('#focusedCover');
         const newCoverScreenshot = await newCover.screenshot();
 
         // verify the screenshots are different
         expect(Buffer.compare(oldCoverScreenshot, newCoverScreenshot)).not.toBe(0);
 
-        // close focus popup
-        await focusPopup.close();
+        // close focus window
+        await focusWindow.close();
     });
 });
