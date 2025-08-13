@@ -37,11 +37,10 @@
     "build:linux": "electron-builder --linux",
     "build:all": "electron-builder --mac --win --linux",
     "dist": "npm run build",
-    "release": "electron-builder --publish=always",
+    "release": "npx electron-builder --mac --win --linux --publish=always",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
-    "clean": "rimraf dist",
-    "retry": "if pgrep -f \"What to Spin\" > /dev/null; then killall \"What to Spin\" && npm run clean && npm run pack && open \"dist/mac-arm64/What to Spin.app\"; else npm run clean && npm run pack && open \"dist/mac-arm64/What to Spin.app\"; fi"
+    "clean": "rimraf dist"
   },
   "build": {
     "appId": "com.whatospin.app",
