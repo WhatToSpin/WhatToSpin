@@ -136,7 +136,7 @@ function registerIpcHandlers() {
         const [mainWidth, mainHeight] = mainWindow.getSize();
 
         const windowWidth = 300;
-        const windowHeight = 400;
+        const windowHeight = 370;
         const windowX = mainX + Math.floor((mainWidth - windowWidth) / 2);
         const windowY = mainY + Math.floor((mainHeight - windowHeight) / 2);
 
@@ -177,7 +177,7 @@ function registerIpcHandlers() {
         const [mainWidth, mainHeight] = mainWindow.getSize();
 
         const windowWidth = 300;
-        const windowHeight = 400;
+        const windowHeight = 370;
         const windowX = mainX + Math.floor((mainWidth - windowWidth) / 2);
         const windowY = mainY + Math.floor((mainHeight - windowHeight) / 2);
 
