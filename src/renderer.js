@@ -273,7 +273,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const maxAccel = 1.1; // min of 1 second
         const accel = Math.random() * (maxAccel - minAccel) + minAccel;
         
-        let startTime = Date.now();
         while (true) {
             // update display
             currentIndex = (currentIndex + 1) % albums.length;
@@ -288,8 +287,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentSpeed = Math.min(currentSpeed * accel, endSpeed);
             await new Promise(resolve => setTimeout(resolve, currentSpeed));
         }
-
-        window.electronAPI.debug(Date.now() - startTime);
         
         // focus final album after 500 ms
         await new Promise(resolve => setTimeout(resolve, 500));
