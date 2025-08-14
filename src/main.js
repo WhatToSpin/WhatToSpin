@@ -5,7 +5,7 @@ const { registerIpcHandlers } = require('./registerIpcHandlers');
 async function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 600,
-        height: 350,
+        height: 380,
         show: false,
         resizable: false,
         titleBarStyle: 'customButtonsOnHover',

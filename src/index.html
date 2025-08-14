@@ -8,8 +8,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div id="menuBar" class="menu-bar">
+        <button id="searchIcon" class="search-icon" title="Search collection">
+            <img src="assets/icons/search.png" alt="Shuffle">
+        </button>
+        <div id="searchBar" class="search-bar hidden">
+            <input type="text" id="searchInput" placeholder="Search...">
+        </div>
+        <span id="infoIcon" class="info-icon">&#8505;</span>
+    </div>
     <div id="infoOverlay" class="info-overlay">
         <div id="infoPage" class="info-page">
+            <div class="close">Press 'Escape' to close</div>
             <h1 id="collectionSize"></h1>
             <h1 id="numArtists"></h1>
             <h1 id="topArtist"></h1>

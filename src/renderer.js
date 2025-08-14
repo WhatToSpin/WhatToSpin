@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rightCover = document.getElementById('rightCover');
     const wayRightCover = document.getElementById('wayRightCover');
 
+    const searchIcon = document.getElementById('searchIcon');
+    const searchBar = document.getElementById('searchBar');
+    const searchInput = document.getElementById('searchInput');
+    const infoButton = document.getElementById('infoIcon');    
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
 
@@ -18,6 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const numArtists = document.getElementById('numArtists');
     const topArtist = document.getElementById('topArtist');
     const chartIntro = document.getElementById('chartIntro');
+
+    let infoDisplayed = false;
 
     let cachedStats = null;
     let cachedChart = null;
@@ -263,6 +269,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
+    searchIcon.addEventListener('click', () => {
+        searchBar.classList.toggle('hidden');
+    })
+
+    searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            const searchText = searchInput.value.trim();
+            window.electronAPI.debug(`Search text: ${searchText}`);
+        }
+    })
+
     function getCollectionStats() {
         if (cachedStats && !wasCollectionUpdated) {
             return cachedStats
@@ -421,15 +438,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         infoOverlay.classList.add('show');
     }
 
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Shift') {
-            showAlbumInfo();
+    infoButton.addEventListener('click', async () => {
+        if (infoDisplayed) {
+            infoOverlay.classList.remove('show');
+            infoDisplayed = false;
+            return;
         }
+        infoDisplayed = true;
+        showAlbumInfo();
     });
 
-    document.addEventListener('keyup', (event) => {
-        if (event.key === 'Shift') {
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && infoDisplayed) {
             infoOverlay.classList.remove('show');
+            infoDisplayed = false;
         }
     });
 
