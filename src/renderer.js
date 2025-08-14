@@ -13,6 +13,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
 
+    const infoOverlay = document.getElementById('infoOverlay');
+    const collectionSize = document.getElementById('collectionSize');
+    const numArtists = document.getElementById('numArtists');
+    const topArtist = document.getElementById('topArtist');
+    const chartIntro = document.getElementById('chartIntro');
+
+    let cachedStats = null;
+    let cachedChart = null;
+    let wasCollectionUpdated = false;
+
     let allowShuffle = true;
     let allowCoverFocus = true;
 
@@ -31,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentIndex = 0; // no albums yet
         }
         await updateDisplay();
+
     } catch (error) {
         console.error('Error loading albums:', error);
         albums = [];
@@ -252,6 +263,159 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
+    function getCollectionStats() {
+        if (cachedStats && !wasCollectionUpdated) {
+            return cachedStats
+        }
+
+        // number of distinct artists
+        const numArtistsResult = new Set(albums.map(album => album.artist)).size;
+
+        // largest artist discography
+        const topArtistInfo = albums.reduce((result, album) => {
+            const currentCount = (result.artistCounts[album.artist] || 0) + 1;
+            result.artistCounts[album.artist] = currentCount;
+            
+            if (currentCount > result.maxCount) {
+                result.maxCount = currentCount;
+                result.topArtist = album.artist;
+            }
+
+            return result;
+        }, { artistCounts: {}, maxCount: 0, topArtist: null });
+
+        // number of albums by year 
+        const albumsByYear = albums.reduce((counts, album) => {
+            counts[album.year] = (counts[album.year] || 0) + 1;
+            return counts;
+        }, {});
+
+        // min and max year
+        const minYear = Math.min(...Object.keys(albumsByYear).map(Number));
+        const maxYear = Math.max(...Object.keys(albumsByYear).map(Number));
+
+        // reset cached stats
+        cachedStats = {
+            size: albums.length,
+            numArtists: numArtistsResult,
+            topArtist: topArtistInfo.topArtist,
+            topArtistCount: topArtistInfo.maxCount,
+            albumsByYear: albumsByYear,
+            minYear: minYear,
+            maxYear: maxYear
+        }
+
+        // reset collection changed flag
+        wasCollectionUpdated = false;
+
+        return cachedStats
+    }
+
+    function createAlbumChart(albumsByYear, minYear, maxYear) {
+        if (cachedChart && !wasCollectionUpdated) {
+            return;
+        }
+
+        if (cachedChart) {
+            cachedChart.destroy()
+        }
+
+        const years = Object.keys(albumsByYear).map(Number).sort((a, b) => a - b);
+        const counts = years.map(year => albumsByYear[year]);
+        
+        // get range of decades
+        const minDecade = Math.floor(minYear / 10) * 10;
+        const maxDecade = Math.floor(maxYear / 10) * 10;
+        const allDecades = [];
+        for (let decade = minDecade; decade <= maxDecade; decade += 10) {
+            allDecades.push(decade);
+        }
+
+        const config = {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'Albums by Year',
+                    data: counts,
+                    borderColor: '#333',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: null
+                },
+                hover: {
+                    mode: null
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Number of Albums' }
+                    },
+                    x: {
+                        ticks: {
+                            callback: function(value) {
+                                const year = this.getLabelForValue(value);
+                                const decade = Math.floor(year / 10) * 10;
+                                return allDecades.includes(decade) ? decade : '';
+                            },
+                            maxTicksLimit: allDecades.length
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false 
+                    },
+                    hover: {
+                        mode: null
+                    },
+                }
+            }
+        };
+
+        const ctx = document.getElementById('albumChart').getContext('2d');
+        cachedChart = new Chart(ctx, config);
+    }
+
+    function showAlbumInfo() {
+        if (albums.length === 0) {
+            collectionSize.innerHTML = `Add an album to start tracking your collection stats`
+            infoOverlay.classList.add('show');
+            return
+        }
+
+        const collectionStats = getCollectionStats();
+
+        collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> albums in your collection`;
+        numArtists.innerHTML = `There are <b>${collectionStats.numArtists}</b> different artists in your collection`;
+        topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
+        chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
+
+        createAlbumChart(collectionStats.albumsByYear, collectionStats.minYear, collectionStats.maxYear);
+
+        infoOverlay.classList.add('show');
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Shift') {
+            showAlbumInfo();
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (event.key === 'Shift') {
+            infoOverlay.classList.remove('show');
+        }
+    });
+
     shuffleButton.addEventListener('click', async () => {
         if (albums.length === 0 || !allowShuffle) return;
         
@@ -339,6 +503,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // listen for an album added
     window.electronAPI.onAlbumAdded(async (albumData) => {
+
+        wasCollectionUpdated = true;
 
         // store the current album before refreshing the collection
         const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;

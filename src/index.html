@@ -5,8 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What to Spin</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div id="infoOverlay" class="info-overlay">
+        <div id="infoPage" class="info-page">
+            <h1 id="collectionSize"></h1>
+            <h1 id="numArtists"></h1>
+            <h1 id="topArtist"></h1>
+            <h1 id="chartIntro"></h1>
+            <div class="chart-container">
+                <canvas id="albumChart"></canvas>
+            </div>
+        </div>
+    </div>
     <div class="rotating-container">
         <img class="cover way-left" id="wayLeftCover">
         <img class="cover left" id="leftCover">
