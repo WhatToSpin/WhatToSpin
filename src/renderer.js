@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
 
+    let allowShuffle = true;
+    let allowCoverFocus = true;
+
     const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
     
     let albums = [];
@@ -250,36 +253,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     shuffleButton.addEventListener('click', async () => {
-        if (albums.length === 0) return;
+        if (albums.length === 0 || !allowShuffle) return;
+        
+        // prevent shuffle and cover focus
+        allowShuffle = false;
+        allowCoverFocus = false;
+        
         await shuffleAlbums();
+        
+        allowShuffle = true;
+        allowCoverFocus = true;
     });
 
     async function shuffleAlbums() {
-        const shuffleTime = 1 * 1000 + Math.random() * 2000; // 1 - 3 seconds
-        const startTime = Date.now();
+        // speed info
+        let currentSpeed = 50;
+        const endSpeed = 150;
+        const minAccel = 1.02; // max of 5 seconds
+        const maxAccel = 1.1; // min of 1 second
+        const accel = Math.random() * (maxAccel - minAccel) + minAccel;
         
-        const shuffleInterval = setInterval(async () => {
+        let startTime = Date.now();
+        while (true) {
+            // update display
             currentIndex = (currentIndex + 1) % albums.length;
             await updateDisplay();
-            
-            if (Date.now() - startTime >= shuffleTime) {
-                clearInterval(shuffleInterval);
-                // selected album
-                currentIndex = getRandomIndex(albums.length);
-                await updateDisplay();
-                
-                // show focused album after 500 ms
-                setTimeout(async () => {
-                    try {
-                        await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
-                    } catch (error) {
-                        console.error('Error opening album focus window:', error);
-                        alert('Failed to open album focus window. Please try again.');
-                    }
-
-                }, 500);
+                        
+            // check stop conditions 
+            if (currentSpeed >= endSpeed) {
+                break;
             }
-        }, 100); // update every 100ms 
+            
+            // update speed and wait
+            currentSpeed = Math.min(currentSpeed * accel, endSpeed);
+            await new Promise(resolve => setTimeout(resolve, currentSpeed));
+        }
+
+        window.electronAPI.debug(Date.now() - startTime);
+        
+        // focus final album after 500 ms
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        try {
+            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
+        } catch (error) {
+            console.error('Error opening album focus window:', error);
+        }
     }
 
     addAlbumButton.addEventListener('click', async () => {
@@ -292,7 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     centerCover.addEventListener('click', async () => {
-        if (albums.length === 0) return;
+        if (albums.length === 0 || !allowCoverFocus) return;
         try {
             await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
         } catch (error) {

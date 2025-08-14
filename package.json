@@ -1,6 +1,6 @@
 {
   "name": "what-to-spin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "src/main.js",
   "homepage": ".",
   "author": "Ethan Burmane <ethanburmane@gmail.com>",
@@ -37,7 +37,7 @@
     "build:linux": "electron-builder --linux",
     "build:all": "electron-builder --mac --win --linux",
     "dist": "npm run build",
-    "release": "npx electron-builder --mac --win --linux --publish=always",
+    "release": "npx electron-builder --publish=always",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
     "clean": "rimraf dist"
