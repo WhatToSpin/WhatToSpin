@@ -323,25 +323,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         const years = Object.keys(albumsByYear).map(Number).sort((a, b) => a - b);
         const counts = years.map(year => albumsByYear[year]);
         
-        // get range of decades
-        const minDecade = Math.floor(minYear / 10) * 10;
-        const maxDecade = Math.floor(maxYear / 10) * 10;
-        const allDecades = [];
-        for (let decade = minDecade; decade <= maxDecade; decade += 10) {
-            allDecades.push(decade);
-        }
+        const decadeData = {};
+        Object.entries(albumsByYear).forEach(([year, count]) => {
+            const decade = Math.floor(Number(year) / 10) * 10;
+            decadeData[decade] = (decadeData[decade] || 0) + count;
+        });
+
+        const sortedDecades = Object.keys(decadeData).map(Number).sort((a, b) => a - b);
+        const decadeCounts = sortedDecades.map(decade => decadeData[decade]);
+        const decadeLabels = sortedDecades.map(decade => `${decade}s`);
 
         const config = {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: years,
+                labels: decadeLabels,
                 datasets: [{
-                    label: 'Albums by Year',
-                    data: counts,
+                    label: 'Albums by Decade',
+                    data: decadeCounts,
                     borderColor: '#333',
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 0
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false,
                 }]
             },
             options: {
@@ -354,19 +356,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hover: {
                     mode: null
                 },
+                onHover: null,
                 scales: {
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: 'Number of Albums' }
+                        ticks: {
+                            precision: 0
+                        },
+                        grid: {
+                            color: '#ddd',
+                            lineWidth: 1
+                        }
                     },
                     x: {
+                        grid: {
+                            display: false
+                        },
                         ticks: {
-                            callback: function(value) {
-                                const year = this.getLabelForValue(value);
-                                const decade = Math.floor(year / 10) * 10;
-                                return allDecades.includes(decade) ? decade : '';
-                            },
-                            maxTicksLimit: allDecades.length
+                            maxRotation: 0,
                         }
                     }
                 },
@@ -377,6 +384,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     hover: {
                         mode: null
                     },
+                },
+                animation: {
+                    duration: 0
+                },
+                transitions: {
+                    active: {
+                        animation: {
+                            duration: 0
+                        }
+                    }
                 }
             }
         };
