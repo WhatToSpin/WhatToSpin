@@ -5,31 +5,31 @@ const path = require('path');
 const filepath = require('./filepath');
 
 async function getAlbumsFromCollection() {
-    let collection;
+    let albums;
     try {
-        collection = await fsPromises.readFile(path.join(filepath.userData, 'collection.json'), 'utf-8');
-        collection = JSON.parse(collection);
+        albums = await fsPromises.readFile(path.join(filepath.userData, 'collection.json'), 'utf-8');
+        albums = JSON.parse(albums);
     } catch (error) {
-        collection = { albums: [] };
+        albums = [];
         await fsPromises.mkdir(path.dirname(path.join(filepath.userData, 'collection.json')), { recursive: true });
-        await fsPromises.writeFile(path.join(filepath.userData, 'collection.json'), JSON.stringify(collection, null, 2));
+        await fsPromises.writeFile(path.join(filepath.userData, 'collection.json'), JSON.stringify(albums, null, 2));
     }
-    return collection;
+    return albums;
 }
 
-async function sortCollection(collection) {
-    collection.albums.sort((a, b) => {
+async function sortCollection(albums) {
+    albums.sort((a, b) => {
         // remove "the" for sorting 
         const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
         const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
         return artistA.localeCompare(artistB) || a.year - b.year; // sort by artist, then year
     });
-    return collection;
+    return albums;
 }
 
 async function addAlbumToCollection(albumData) {
     try {
-        let collection = await getAlbumsFromCollection();
+        let albums = await getAlbumsFromCollection();
 
         if (!albumData || typeof albumData !== 'object') {
             throw new Error('Invalid album data provided');
@@ -44,7 +44,7 @@ async function addAlbumToCollection(albumData) {
         }
 
         // make sure album does not already exist
-        const albumsData = collection.albums;
+        const albumsData = albums;
         if (albumsData.length !== 0) {
             const existingAlbum = albumsData.find(
                 (a) => a.album.toLowerCase() === album.toLowerCase() &&
@@ -67,12 +67,12 @@ async function addAlbumToCollection(albumData) {
             coverPath: coverPath,
         };
 
-        collection.albums.push(newAlbum);
-        collection = await sortCollection(collection);
+        albums.push(newAlbum);
+        albums = await sortCollection(albums);
 
         await fsPromises.writeFile(
             path.join(filepath.userData, 'collection.json'),
-            JSON.stringify(collection, null, 2)
+            JSON.stringify(albums, null, 2)
         );
 
         return { success: true  };
@@ -159,19 +159,19 @@ async function deleteAlbumFromCollection(albumData) {
     const coverPath = albumData.coverPath;
 
     // make sure collection.json exists
-    let collection = await getAlbumsFromCollection();
-    if (!collection || !collection.albums) {
+    let albums = await getAlbumsFromCollection();
+    if (!albums) {
         return { success: false, error: 'Collection is empty or does not exist' };
     }
 
     // delete album from the collection
-    const albumIndex = collection.albums.findIndex(
+    const albumIndex = albums.findIndex(
         (a) => a.album === album && a.artist === artist
     );
     if (albumIndex === -1) {
         throw new Error('Album not found in the collection');
     }
-    collection.albums.splice(albumIndex, 1);
+    albums.splice(albumIndex, 1);
 
     // delete the cover image
     if (coverPath && fs.existsSync(coverPath) && coverPath !== filepath.unknownCover) {
@@ -181,15 +181,15 @@ async function deleteAlbumFromCollection(albumData) {
     // write updated collection
     await fsPromises.writeFile(
         path.join(filepath.userData, 'collection.json'),
-        JSON.stringify(collection, null, 2)
+        JSON.stringify(albums, null, 2)
     );
 
-    return { success: true, isEmpty: collection.albums.length === 0 };
+    return { success: true, isEmpty: albums.length === 0 };
 }
 
 async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData) {
     
-    let collection = await getAlbumsFromCollection();
+    let albums = await getAlbumsFromCollection();
 
     // change cover path if album/artist changed
     let coverPath;
@@ -212,7 +212,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     }
 
     // get album index
-    let albumIndex = collection.albums.findIndex(
+    let albumIndex = albums.findIndex(
         (a) => a.album === oldAlbumData.album && a.artist === oldAlbumData.artist
     );
     if (albumIndex === -1) {
@@ -220,7 +220,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     }
 
     // update album metadata
-    collection.albums[albumIndex] = {
+    albums[albumIndex] = {
         album: newAlbumData.album,
         artist: newAlbumData.artist,
         year: newAlbumData.year,
@@ -228,10 +228,10 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     }
 
     if (oldAlbumData.artist !== newAlbumData.artist || oldAlbumData.year !== newAlbumData.year) {
-        collection = await sortCollection(collection);
+        albums = await sortCollection(albums);
 
         // recalculate album index in case order changed
-        albumIndex = collection.albums.findIndex(
+        albumIndex = albums.findIndex(
             (a) => a.album === newAlbumData.album && a.artist === newAlbumData.artist
         );
         if (albumIndex === -1) {
@@ -242,10 +242,10 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     // rewrite to collection.json
     await fsPromises.writeFile(
         path.join(filepath.userData, 'collection.json'),
-        JSON.stringify(collection, null, 2)
+        JSON.stringify(albums, null, 2)
     );
 
-    return { success: true, updatedAlbum: collection.albums[albumIndex] };
+    return { success: true, updatedAlbum: albums[albumIndex] };
 }
 
 async function generateCoverPath(album, artist) {

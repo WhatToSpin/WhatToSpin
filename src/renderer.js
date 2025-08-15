@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rightCover = document.getElementById('rightCover');
     const wayRightCover = document.getElementById('wayRightCover');
 
+    // search elements
+    const searchIcon = document.getElementById('searchIcon');
+    const searchBar = document.getElementById('searchBar');
+    const searchInput = document.getElementById('searchInput');
+    const cancelIcon = document.getElementById('cancelIcon');
+
     // info page elements
     const infoButton = document.getElementById('infoIcon');    
     const infoOverlay = document.getElementById('infoOverlay');
@@ -35,11 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let albums = [];
     let currentIndex = 0;
-    let currentAlbumCoverColor = '#cfcfcf'; // for 'add' button 
+    let currentAlbumCoverColor = '#cfcfcf'; // for button styling
     
     try {
-        collection = await window.electronAPI.getAlbumsFromCollection();
-        albums = collection.albums;  
+        albums = await window.electronAPI.getAlbumsFromCollection();
         if (albums.length > 0) {
             currentIndex = getRandomIndex(albums.length); // start with a random album
         } else {
@@ -268,6 +273,152 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Failed to load image for color extraction:', albumCoverPath);
             currentAlbumCoverColor = '#cfcfcf';
         };
+    }
+
+    /* SEARCH LOGIC */
+
+    searchIcon.addEventListener('click', () => {
+        searchBar.classList.toggle('hidden')
+    });
+
+
+    searchInput.addEventListener('keydown', (event) => {
+        if (event.key === "Enter") {
+            
+            // replace search icon with cancel icon
+            searchIcon.classList.add('hidden');
+            cancelIcon.classList.remove('hidden');
+
+            // handle input
+            const input = searchInput.value.trim();
+            searchInput.blur();
+            handleSearch(input);
+        }
+    });
+
+    cancelIcon.addEventListener('click', async () => {
+        searchInput.value = '';
+        cancelIcon.classList.add('hidden');
+        searchIcon.classList.remove('hidden');
+        albums = await window.electronAPI.getAlbumsFromCollection();
+        updateDisplay();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!searchBar.classList.contains('hidden') && !event.target.closest('.search-icon') && !event.target.closest('.search-bar') && searchInput.value == '') {
+            searchBar.classList.add('hidden');
+        }
+    });
+
+    async function handleSearch(input) {
+
+        // get query tokens
+        const results = tokenizeInput(input);
+        
+        // start with full collection
+        let matchedAlbums = await window.electronAPI.getAlbumsFromCollection();
+
+        // check exact matches
+        if (results.exact.length > 0) {
+            matchedAlbums = albums.filter(album => {
+                return results.exact.some(exact => 
+                    album.album === exact ||
+                    album.artist === exact
+                );
+            });
+        }
+
+        // check field specific searches
+        if (results.fields.album && results.fields.album.length > 0) {
+            matchedAlbums = matchedAlbums.filter(album => {
+                return results.fields.album.some(value => album.album.toLowerCase().includes(value.toLowerCase()));
+            });
+        }
+
+        if (results.fields.artist && results.fields.artist.length > 0) {
+            matchedAlbums = matchedAlbums.filter(album => {
+                return results.fields.artist.some(value => album.artist.toLowerCase().includes(value.toLowerCase()));
+            });
+        }
+
+        if (results.fields.year && results.fields.year.length > 0) {
+            matchedAlbums = matchedAlbums.filter(album => {
+                return results.fields.year.some(value => album.year.toString() === value);
+            });
+        }
+
+        // check year ranges
+        if (results.ranges.from) {
+            matchedAlbums = matchedAlbums.filter(album => 
+                parseInt(album.year) >= results.ranges.from
+            );
+        }
+
+        if (results.ranges.to) {
+            matchedAlbums = matchedAlbums.filter(album => 
+                parseInt(album.year) <= results.ranges.to
+            );
+        }
+
+        // check general searches
+        if (results.general.length > 0) {
+            matchedAlbums = matchedAlbums.filter(album => {
+                return results.general.some(term =>
+                    album.album.toLowerCase().includes(term) ||
+                    album.artist.toLowerCase().includes(term) ||
+                    album.year.toString() === term
+                );
+            });
+        }
+
+        // set global albums to filtered collection
+        albums = matchedAlbums;
+        currentIndex = 0;
+        await updateDisplay();
+    }
+
+    function tokenizeInput(input) {
+
+        const results = {
+            general: [],
+            exact: [],
+            fields: {},
+            ranges: {}
+        };
+
+        // handle exact, range, field, and general search types
+        const tokens = input.match(/(?:"[^"]*"|(?:year:|artist:|album:|from:|to:|[a-zA-Z]+:)(?:"[^"]*"|\S+)|\S+)/gm) || [];
+        tokens.forEach(token => {
+
+            // exact match (highest priority)
+            if (token.startsWith('"') && token.endsWith('"')) {
+                results.exact.push(token.slice(1, -1));
+            }
+
+            // field specific search
+            else if (token.includes('album:') || token.includes('artist:') || token.includes('year:')) {
+                let [field, value] = token.split(':', 2);
+                if (!results.fields[field]) results.fields[field] = [];
+                if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+                results.fields[field].push(value);
+                window.electronAPI.debug(`field ${field} value ${value}`);
+            }
+
+            // year ranges
+            else if (token.includes('from:') || token.includes('to:')) {
+                const [key, value] = token.split(':');
+                if (!isNaN(value)) {
+                    results.ranges[key] = parseInt(value);
+                }
+            }
+
+            // general search (lowest priority)
+            else {
+                results.general.push(token.toLowerCase());
+            }
+        });
+
+        return results;
     }
 
     /* INFORMATION PAGE LOGIC */
@@ -558,8 +709,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;
 
         // refresh album list
-        collection = await window.electronAPI.getAlbumsFromCollection();
-        albums = collection.albums;
+        albums = await window.electronAPI.getAlbumsFromCollection();
 
         if (!albumData) {
             // album was deleted -- reset index

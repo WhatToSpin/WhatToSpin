@@ -21,11 +21,11 @@ function registerIpcHandlers() {
 
     ipcMain.handle('get-albums', async () => {
         try {
-            const collection = await getAlbumsFromCollection();
-            return collection;
+            const albums = await getAlbumsFromCollection();
+            return albums;
         } catch (error) {
             console.error('Error getting albums:', error);
-            return { albums: [] };
+            return [];
         }
     });
 

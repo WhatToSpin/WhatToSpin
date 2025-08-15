@@ -19,22 +19,24 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
 }
 
 .menu-bar {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
-    /* padding: 10px 10px 20px 10px; */
-    margin: 10px 10px 20px 10px;
+    margin: 10px 10px 30px 10px;
+}
+
+.icon {
+    position: absolute;
+    margin-left: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .search-icon {
-    padding: 0;
-    margin-left: 30px;
     border: none;
     background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .search-icon img {
@@ -54,16 +56,40 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     transition: transform 0.1s ease;
 }
 
+.search-icon.hidden {
+    display: none;
+}
+
+.cancel-icon {
+    border: none;
+    background: none;
+    font-size: 24px;
+}
+
+.cancel-icon:hover {
+    filter: brightness(0.8);
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.cancel-icon:active {
+    transform: translateY(2px);
+    transition: transform 0.1s ease;
+}
+
+.cancel-icon.hidden {
+    display: none;
+}
+
 .search-bar {
     position: absolute;
     top: 50%;
-    left: 50px;
+    left: 75px;
     transform: translateY(-50%);
     display: flex;
     gap: 10px;
     background: #f0f0f0;
     padding: 8px 4px;
-    border-radius: 6px;
     z-index: 10;
 }
 
@@ -74,18 +100,19 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
 .search-bar input {
     border: 0;
     padding: 4px 8px;
-    font-size: 14px;
+    font-size: 18px;
     background: #f0f0f0;
     outline: none;
 }
 
 .info-icon {
     font-size: 16px;
+    top: -15px;
+    right: 0;
     cursor: pointer;
-    margin-right: 10px;
+    position: absolute;
     font-weight: 800;
     color: #666;
-    margin-right: 30px;
     border: none;
     background: none;
 }
@@ -142,7 +169,7 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     position: relative;
     width: 300px;
     height: 200px;
-    margin: 0 auto 15px;
+    margin: 10px auto 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -231,6 +258,7 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 20px;
     margin-bottom: 10px;
     min-height: 80px;
 }
@@ -244,7 +272,7 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
 
 .left-button {
     position: absolute;
-    left: 50px;
+    left: 60px;
     background: none;
     border: none;
     cursor: pointer;
@@ -255,7 +283,7 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
 
 .right-button {
     position: absolute;
-    right: 50px;
+    right: 60px;
     background: none;
     border: none;
     cursor: pointer;
