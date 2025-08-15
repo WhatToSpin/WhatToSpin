@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let albums = [];
     let currentIndex = 0;
+    let savedIndex = 0;
     let currentAlbumCoverColor = '#cfcfcf'; // for button styling
     
     try {
@@ -72,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             centerCover.src = '';
             rightCover.src = '';
             wayRightCover.src = '';
-
+            
             hideCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
             currentAlbumCoverColor = '#cfcfcf'; // reset cover color
 
@@ -126,11 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         if (albums.length >= 5) {
-            centerCover.style.display = 'block';
-            rightCover.style.display = 'block';
-            leftCover.style.display = 'block';
-            wayLeftCover.style.display = 'block';
-            wayRightCover.style.display = 'block';
+            showCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
 
             const current = albums[currentIndex];
             albumTitle.textContent = current.album;
@@ -145,13 +142,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function showCovers(covers) {
         covers.forEach((cover) => {
-            cover.style.display = 'block';
+            cover.classList.remove('hidden');
         });
     }
 
     function hideCovers(covers) {
         covers.forEach((cover) => {
-            cover.style.display = 'none';
+            cover.classList.add('hidden');
         });
     }
 
@@ -300,8 +297,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchInput.value = '';
         cancelIcon.classList.add('hidden');
         searchIcon.classList.remove('hidden');
+
+        // save current album
+        let centerAlbum = null;
+        if (albums.length !== 0) {
+            centerAlbum = albums[currentIndex];
+        }
+
+        // refresh albums
         albums = await window.electronAPI.getAlbumsFromCollection();
-        updateDisplay();
+        
+        // get the index of the album that was shown
+        if (centerAlbum) {
+            currentIndex = findAlbumIndex(centerAlbum)
+        } else {
+            currentIndex = savedIndex;
+        }
+
+        await updateDisplay();
     });
 
     document.addEventListener('click', (event) => {
@@ -314,101 +327,146 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // get query tokens
         const results = tokenizeInput(input);
-        
+
         // start with full collection
         let matchedAlbums = await window.electronAPI.getAlbumsFromCollection();
 
-        // check exact matches
-        if (results.exact.length > 0) {
-            matchedAlbums = albums.filter(album => {
-                return results.exact.some(exact => 
-                    album.album === exact ||
-                    album.artist === exact
-                );
-            });
-        }
-
-        // check field specific searches
-        if (results.fields.album && results.fields.album.length > 0) {
+        // handle each section of OR operation
+        if (results.orGroups && results.orGroups.length > 0) {
             matchedAlbums = matchedAlbums.filter(album => {
-                return results.fields.album.some(value => album.album.toLowerCase().includes(value.toLowerCase()));
-            });
+                return results.orGroups.some(group => {
+
+                    // check general matches for each group
+                    const generalMatch = group.general.length === 0 ||
+                        group.general.every(term => 
+                            album.album.toLowerCase().includes(term) ||
+                            album.artist.toLowerCase().includes(term) ||
+                            album.year.toString() === term
+                        );
+
+                    // check phrase matches for each group
+                    const phraseMatch = group.phrase.length === 0 ||
+                        group.phrase.every(phrase => 
+                            album.album.toLowerCase() === phrase.toLowerCase() ||
+                            album.artist.toLowerCase() === phrase.toLowerCase()
+                        );
+
+                    return generalMatch && phraseMatch;
+                })
+            })
+
+        // handle non-OR input
+        } else {
+
+            // check phrase matches
+            if (results.phrase.length > 0) {
+                matchedAlbums = matchedAlbums.filter(album => {
+                    return results.phrase.some(phrase => 
+                        album.album.toLowerCase() === phrase.toLowerCase() ||
+                        album.artist.toLowerCase() === phrase.toLowerCase()
+                    );
+                });
+            }
+
+            // check general searches
+            if (results.general.length > 0) {
+                matchedAlbums = matchedAlbums.filter(album => {
+                    return results.general.every(term =>
+                        album.album.toLowerCase().includes(term) ||
+                        album.artist.toLowerCase().includes(term) ||
+                        album.year.toString() === term
+                    );
+                });
+            }
         }
 
-        if (results.fields.artist && results.fields.artist.length > 0) {
-            matchedAlbums = matchedAlbums.filter(album => {
-                return results.fields.artist.some(value => album.artist.toLowerCase().includes(value.toLowerCase()));
-            });
-        }
-
-        if (results.fields.year && results.fields.year.length > 0) {
-            matchedAlbums = matchedAlbums.filter(album => {
-                return results.fields.year.some(value => album.year.toString() === value);
-            });
-        }
-
-        // check year ranges
-        if (results.ranges.from) {
+        // always check year ranges
+        if (results.ranges[0] !== 0) {
             matchedAlbums = matchedAlbums.filter(album => 
-                parseInt(album.year) >= results.ranges.from
+                parseInt(album.year) >= results.ranges[0]
             );
         }
 
-        if (results.ranges.to) {
+        if (results.ranges[1] !== Infinity) {
             matchedAlbums = matchedAlbums.filter(album => 
-                parseInt(album.year) <= results.ranges.to
+                parseInt(album.year) <= results.ranges[1]
             );
-        }
-
-        // check general searches
-        if (results.general.length > 0) {
-            matchedAlbums = matchedAlbums.filter(album => {
-                return results.general.some(term =>
-                    album.album.toLowerCase().includes(term) ||
-                    album.artist.toLowerCase().includes(term) ||
-                    album.year.toString() === term
-                );
-            });
         }
 
         // set global albums to filtered collection
         albums = matchedAlbums;
+        savedIndex = currentIndex;
         currentIndex = 0;
         await updateDisplay();
     }
 
     function tokenizeInput(input) {
 
-        const results = {
+        let results = {
             general: [],
-            exact: [],
-            fields: {},
-            ranges: {}
+            phrase: [],
+            ranges: [0, Infinity],
+            orGroups: []
         };
 
-        // handle exact, range, field, and general search types
-        const tokens = input.match(/(?:"[^"]*"|(?:year:|artist:|album:|from:|to:|[a-zA-Z]+:)(?:"[^"]*"|\S+)|\S+)/gm) || [];
+        // AND operator already handled by general search
+        input.replace(" AND ", " ");
+
+        // split OR sections and handle each one
+        const orSections = input.split(" OR ");
+        if (orSections.length > 1) {
+            orSections.forEach(section => {
+                const sectionResults = tokenizeSection(section.trim());
+
+                // save general and/or phrase tokens from section
+                if (sectionResults.general.length > 0 || sectionResults.phrase.length > 0) {
+                    results.orGroups.push(sectionResults);
+                }
+
+                // always save ranges
+                if (sectionResults.ranges[0] !== 0 || sectionResults.ranges[1] !== Infinity) {
+                    results.ranges = sectionResults.ranges;
+                }
+            });
+
+        // handle normally
+        } else {
+            results = tokenizeSection(input);
+        }
+
+        return results;
+    }
+
+    function tokenizeSection(section) {
+
+        const results = { general: [], phrase: [], ranges: [0, Infinity] };
+
+        // handle phrase, range, and general search types
+        const tokens = section.match(/(?:"[^"]*"|(?:year:|artist:|album:|from:|to:|[a-zA-Z]+:)(?:"[^"]*"|\S+)|\S+)/gm) || [];
         tokens.forEach(token => {
 
-            // exact match (highest priority)
+            const rangeMatch = token.match(/year([<>]={0,1})[0-9]+/);
+
+            // phrase match (highest priority)
             if (token.startsWith('"') && token.endsWith('"')) {
-                results.exact.push(token.slice(1, -1));
+                results.phrase.push(token.slice(1, -1));
             }
 
-            // field specific search
-            else if (token.includes('album:') || token.includes('artist:') || token.includes('year:')) {
-                let [field, value] = token.split(':', 2);
-                if (!results.fields[field]) results.fields[field] = [];
-                if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
-                results.fields[field].push(value);
-                window.electronAPI.debug(`field ${field} value ${value}`);
+            // year ranges (less than/greater than syntax)
+            else if (rangeMatch) {
+                const year = parseInt(token.split(rangeMatch[1])[1]);
+                if (rangeMatch[1] === '>=') results.ranges[0] = year;
+                else if (rangeMatch[1] === '<=') results.ranges[1] = year;
+                else if (rangeMatch[1] === '>') results.ranges[0] = year + 1;
+                else if (rangeMatch[1] === '<') results.ranges[1] = year + 1;
             }
 
-            // year ranges
+            // year ranges (from/to syntax)
             else if (token.includes('from:') || token.includes('to:')) {
                 const [key, value] = token.split(':');
                 if (!isNaN(value)) {
-                    results.ranges[key] = parseInt(value);
+                    if (key === 'from:') results.ranges[0] = year; 
+                    else if (key === 'to:') results.ranges[1] = year;
                 }
             }
 
@@ -696,6 +754,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDisplay();
     });
 
+    function findAlbumIndex(albumInfo) {
+        const newIndex = albums.findIndex(album => 
+            album.album === albumInfo.album &&
+            album.artist === albumInfo.artist
+        );
+        return newIndex;
+    }
 
     /* CALLBACK FOR COLLECTION UPDATES */
 
@@ -706,34 +771,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // store the current album before refreshing the collection
         const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;
-
-        // refresh album list
         albums = await window.electronAPI.getAlbumsFromCollection();
+        window.electronAPI.debug(currentIndex);
 
         if (!albumData) {
-            // album was deleted -- reset index
-            currentIndex = currentIndex > 0 ? getRandomIndex(albums.length) : 0;
+            // album was deleted
+            currentIndex = currentIndex > 0 ? currentIndex : 0;
         } else {
-            // try to find the updated album by matching the albumData provided
-            let newIndex = albums.findIndex(album => 
-                album.album === albumData.album &&
-                album.artist === albumData.artist
-            );
-
-            // if not found and we had a current album, try to stay on the same position
-            if (newIndex === -1 && currentAlbum) {
-                // try to find by original album data
-                newIndex = albums.findIndex(album => 
-                    album.album === currentAlbum.album &&
-                    album.artist === currentAlbum.artist
-                );
-            }
-
-            // if still not found, try to maintain current position or use 0
-            if (newIndex === -1) {
-                currentIndex = currentIndex < albums.length ? currentIndex : 0;
-            } else {
+            // try to find the updated album
+            let newIndex = findAlbumIndex(albumData);
+            if (newIndex > -1 && newIndex < albums.length) {
                 currentIndex = newIndex;
+            } else {
+                currentIndex = currentIndex < albums.length ? currentIndex : 0;
             }
         }
 
@@ -744,3 +794,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 function getRandomIndex(length) {
     return Math.floor(Math.random() * length);
 };
+

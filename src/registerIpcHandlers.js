@@ -3,7 +3,8 @@ const {
     addAlbumToCollection, 
     getAlbumsFromCollection, 
     deleteAlbumFromCollection, 
-    updateAlbumInCollection 
+    updateAlbumInCollection,
+    updateSortingMethod
 } = require('../utils/albumManager');
 const { BrowserWindow } = require('electron');
 const path = require('path');
@@ -74,6 +75,8 @@ function registerIpcHandlers() {
             return { success: false, error: error.message };
         }
     });
+
+    ipcMain.handle('update-sorting-method', async (event, method) => updateSortingMethod(method) );
 
     ipcMain.handle('notify-album-added', async (event, albumData) => {
         const addAlbumWindow = BrowserWindow.fromWebContents(event.sender);

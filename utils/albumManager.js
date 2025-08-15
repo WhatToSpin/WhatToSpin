@@ -4,6 +4,15 @@ const albumArt = require('album-art');
 const path = require('path');
 const filepath = require('./filepath');
 
+/*
+    SORTING OPTIONS:
+    1 - by artist, then discography
+    2 - by year
+    3 - by date added
+*/
+
+let sortingMethod = 1; // default
+
 async function getAlbumsFromCollection() {
     let albums;
     try {
@@ -15,6 +24,10 @@ async function getAlbumsFromCollection() {
         await fsPromises.writeFile(path.join(filepath.userData, 'collection.json'), JSON.stringify(albums, null, 2));
     }
     return albums;
+}
+
+function updateSortingMethod(method) {
+    sortingMethod = method;
 }
 
 async function sortCollection(albums) {
@@ -264,4 +277,5 @@ module.exports = {
     getAlbumsFromCollection, 
     deleteAlbumFromCollection,
     updateAlbumInCollection,
+    updateSortingMethod
 };
