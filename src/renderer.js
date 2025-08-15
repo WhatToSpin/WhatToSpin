@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
         chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
 
-        createAlbumChart(collectionStats.albumsByYear, collectionStats.minYear, collectionStats.maxYear);
+        createAlbumChart(collectionStats.albumsByYear);
 
         infoOverlay.classList.add('show');
     }
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, {});
 
         // min and max year
-        const minYear = Math.min(...Object.keys(albumsByYear).map(Number));
+        const minYear = Math.min(...Object.keys(albumsByYear).map(Number).filter(year => year >= 1900)); // see below
         const maxYear = Math.max(...Object.keys(albumsByYear).map(Number));
 
         // reset cached stats
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return cachedStats
     }
 
-    function createAlbumChart(albumsByYear, minYear, maxYear) {
+    function createAlbumChart(albumsByYear) {
         if (cachedChart && !wasCollectionUpdated) {
             return;
         }
@@ -517,14 +517,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cachedChart) {
             cachedChart.destroy()
         }
-
-        const years = Object.keys(albumsByYear).map(Number).sort((a, b) => a - b);
-        const counts = years.map(year => albumsByYear[year]);
         
         const decadeData = {};
         Object.entries(albumsByYear).forEach(([year, count]) => {
-            const decade = Math.floor(Number(year) / 10) * 10;
-            decadeData[decade] = (decadeData[decade] || 0) + count;
+            if (year >= 1900) { // the first modern vinyl record was released in 1948, so this is generous
+                const decade = Math.floor(Number(year) / 10) * 10;
+                decadeData[decade] = (decadeData[decade] || 0) + count;
+            }
         });
 
         const sortedDecades = Object.keys(decadeData).map(Number).sort((a, b) => a - b);
