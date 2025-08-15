@@ -1,22 +1,19 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
+    // center album info
     const albumTitle = document.getElementById('albumTitle');
     const artistName = document.getElementById('artistName');
     const year = document.getElementById('year');
     
+    // covers
     const wayLeftCover = document.getElementById('wayLeftCover');
     const leftCover = document.getElementById('leftCover');
     const centerCover = document.getElementById('centerCover');
     const rightCover = document.getElementById('rightCover');
     const wayRightCover = document.getElementById('wayRightCover');
 
-    const searchIcon = document.getElementById('searchIcon');
-    const searchBar = document.getElementById('searchBar');
-    const searchInput = document.getElementById('searchInput');
+    // info page elements
     const infoButton = document.getElementById('infoIcon');    
-    const addAlbumButton = document.getElementById('addAlbumButton');
-    const shuffleButton = document.getElementById('shuffleButton');
-
     const infoOverlay = document.getElementById('infoOverlay');
     const collectionSize = document.getElementById('collectionSize');
     const numArtists = document.getElementById('numArtists');
@@ -24,13 +21,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chartIntro = document.getElementById('chartIntro');
 
     let infoDisplayed = false;
-
     let cachedStats = null;
     let cachedChart = null;
     let wasCollectionUpdated = false;
-
     let allowShuffle = true;
     let allowCoverFocus = true;
+
+    // add/shuffle buttons
+    const addAlbumButton = document.getElementById('addAlbumButton');
+    const shuffleButton = document.getElementById('shuffleButton');
 
     const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
     
@@ -53,6 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         albums = [];
         await updateDisplay();
     }
+
+    /* DISPLAY LOGIC */
 
     async function updateDisplay() {
         if (albums.length === 0) {
@@ -269,16 +270,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    searchIcon.addEventListener('click', () => {
-        searchBar.classList.toggle('hidden');
-    })
+    /* INFORMATION PAGE LOGIC */
 
-    searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            const searchText = searchInput.value.trim();
-            window.electronAPI.debug(`Search text: ${searchText}`);
+    infoButton.addEventListener('click', async () => {
+        if (infoDisplayed) {
+            infoOverlay.classList.remove('show');
+            infoDisplayed = false;
+            return;
         }
-    })
+        infoDisplayed = true;
+        showAlbumInfo();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && infoDisplayed) {
+            event.preventDefault();
+            infoOverlay.classList.remove('show');
+            infoDisplayed = false;
+        }
+    });
+
+    function showAlbumInfo() {
+        if (albums.length === 0) {
+            collectionSize.innerHTML = `Add an album to start tracking your collection stats`
+            infoOverlay.classList.add('show');
+            return
+        }
+
+        const collectionStats = getCollectionStats();
+
+        collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> albums in your collection`;
+        numArtists.innerHTML = `There are <b>${collectionStats.numArtists}</b> different artists in your collection`;
+        topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
+        chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
+
+        createAlbumChart(collectionStats.albumsByYear, collectionStats.minYear, collectionStats.maxYear);
+
+        infoOverlay.classList.add('show');
+    }
+
 
     function getCollectionStats() {
         if (cachedStats && !wasCollectionUpdated) {
@@ -419,41 +449,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         cachedChart = new Chart(ctx, config);
     }
 
-    function showAlbumInfo() {
-        if (albums.length === 0) {
-            collectionSize.innerHTML = `Add an album to start tracking your collection stats`
-            infoOverlay.classList.add('show');
-            return
-        }
-
-        const collectionStats = getCollectionStats();
-
-        collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> albums in your collection`;
-        numArtists.innerHTML = `There are <b>${collectionStats.numArtists}</b> different artists in your collection`;
-        topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
-        chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
-
-        createAlbumChart(collectionStats.albumsByYear, collectionStats.minYear, collectionStats.maxYear);
-
-        infoOverlay.classList.add('show');
-    }
-
-    infoButton.addEventListener('click', async () => {
-        if (infoDisplayed) {
-            infoOverlay.classList.remove('show');
-            infoDisplayed = false;
-            return;
-        }
-        infoDisplayed = true;
-        showAlbumInfo();
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && infoDisplayed) {
-            infoOverlay.classList.remove('show');
-            infoDisplayed = false;
-        }
-    });
+    /* SHUFFLE COLLECTION LOGIC */
 
     shuffleButton.addEventListener('click', async () => {
         if (albums.length === 0 || !allowShuffle) return;
@@ -471,10 +467,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function shuffleAlbums() {
         // speed info
         let currentSpeed = 50;
-        const endSpeed = 150;
-        const minAccel = 1.02; // max of 5 seconds
-        const maxAccel = 1.1; // min of 1 second
+        const endSpeed = 200;
+        const minAccel = 1.03; // 50 to 200 in 5 seconds
+        const maxAccel = 1.15; // 50 to 200 in 1 seconds
         const accel = Math.random() * (maxAccel - minAccel) + minAccel;
+        let oneSecond = 1000; // spin at 50 ms per iteration for 1 second (to start)
         
         while (true) {
             // update display
@@ -486,8 +483,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break;
             }
             
-            // update speed and wait
-            currentSpeed = Math.min(currentSpeed * accel, endSpeed);
+            if (oneSecond > 0) {
+                // spin for one second first before reducing speed
+                oneSecond -= currentSpeed;
+            } else {
+                // update speed and wait
+                currentSpeed = Math.min(currentSpeed * accel, endSpeed);
+            }            
             await new Promise(resolve => setTimeout(resolve, currentSpeed));
         }
         
@@ -501,6 +503,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    /* ADD ALBUM LOGIC */
+
     addAlbumButton.addEventListener('click', async () => {
         try {
             await window.electronAPI.openAddAlbumWindow(currentAlbumCoverColor);
@@ -509,6 +513,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert(`Failed to add album. Please try again. Error: ${error.message}`);
         }
     });
+
+    /* COVER FOCUS/MOVEMENT LOGIC */
 
     centerCover.addEventListener('click', async () => {
         if (albums.length === 0 || !allowCoverFocus) return;
@@ -539,6 +545,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentIndex = (currentIndex + 2) % albums.length;
         await updateDisplay();
     });
+
+
+    /* CALLBACK FOR COLLECTION UPDATES */
 
     // listen for an album added
     window.electronAPI.onAlbumAdded(async (albumData) => {
