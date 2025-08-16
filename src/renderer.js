@@ -26,14 +26,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const topArtist = document.getElementById('topArtist');
     const chartIntro = document.getElementById('chartIntro');
 
+    // sorting elements
+    const sortIcon = document.getElementById('sortIcon');
+    const sortMenuContent = document.getElementById('sortMenuContent');
+    const sortByArtist = document.getElementById('sortByArtist');
+    const sortByYear = document.getElementById('sortByYear');
+    const sortByDateAdded = document.getElementById('sortByDateAdded');
+
+    // state variables
     let infoDisplayed = false;
     let cachedStats = null;
     let cachedChart = null;
     let wasCollectionUpdated = false;
     let allowShuffle = true;
     let allowCoverFocus = true;
+    let sortingMethod = 1;
 
-    // add/shuffle buttons
+    // function buttons
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
 
@@ -59,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDisplay();
     }
 
-    /* DISPLAY LOGIC */
+    /* DISPLAY */
 
     async function updateDisplay() {
         if (albums.length === 0) {
@@ -272,10 +281,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    /* SEARCH LOGIC */
+    /* SEARCH */
 
     searchIcon.addEventListener('click', () => {
-        searchBar.classList.toggle('hidden')
+        searchBar.classList.toggle('hidden');
+        searchInput.focus();
     });
 
 
@@ -479,7 +489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return results;
     }
 
-    /* INFORMATION PAGE LOGIC */
+    /* INFORMATION PAGE */
 
     infoButton.addEventListener('click', async () => {
         if (infoDisplayed) {
@@ -494,6 +504,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && infoDisplayed) {
             event.preventDefault();
+            event.stopPropagation();
             infoOverlay.classList.remove('show');
             infoDisplayed = false;
         }
@@ -517,7 +528,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         infoOverlay.classList.add('show');
     }
-
 
     function getCollectionStats() {
         if (cachedStats && !wasCollectionUpdated) {
@@ -657,7 +667,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         cachedChart = new Chart(ctx, config);
     }
 
-    /* SHUFFLE COLLECTION LOGIC */
+    /* SORTING */
+
+    sortIcon.addEventListener('click', () => {
+        sortMenuContent.classList.toggle('show');
+    });
+
+    sortByArtist.addEventListener('click', async () => {
+        if (sortingMethod !== 1) {
+            sortingMethod = 1;
+            await updateSorting(sortingMethod);
+        }
+    });
+
+    sortByYear.addEventListener('click', async () => {
+        if (sortingMethod !== 2) {
+            sortingMethod = 2;
+            await updateSorting(sortingMethod);
+        }
+    });
+
+    sortByDateAdded.addEventListener('click', async () => {
+        if (sortingMethod !== 3) {
+            sortingMethod = 3;
+            await updateSorting(sortingMethod);
+        }
+    });
+
+    /* SHUFFLE COLLECTION */
 
     shuffleButton.addEventListener('click', async () => {
         if (albums.length === 0 || !allowShuffle) return;
@@ -711,7 +748,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    /* ADD ALBUM LOGIC */
+    /* ADD ALBUM */
 
     addAlbumButton.addEventListener('click', async () => {
         try {
@@ -722,7 +759,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    /* COVER FOCUS/MOVEMENT LOGIC */
+    /* COVER FOCUS/MOVEMENT */
 
     centerCover.addEventListener('click', async () => {
         if (albums.length === 0 || !allowCoverFocus) return;
@@ -754,14 +791,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDisplay();
     });
 
-    function findAlbumIndex(albumInfo) {
-        const newIndex = albums.findIndex(album => 
-            album.album === albumInfo.album &&
-            album.artist === albumInfo.artist
-        );
-        return newIndex;
-    }
-
     /* CALLBACK FOR COLLECTION UPDATES */
 
     // listen for an album added
@@ -772,7 +801,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // store the current album before refreshing the collection
         const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;
         albums = await window.electronAPI.getAlbumsFromCollection();
-        window.electronAPI.debug(currentIndex);
 
         if (!albumData) {
             // album was deleted
@@ -789,6 +817,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await updateDisplay();
     });
+
+    /* HELPER FUNCTIONS */
+
+    async function updateSorting(method) {
+        currentAlbum = albums[currentIndex];
+        albums = await window.electronAPI.updateSortingMethod(method, albums);
+
+        let index;
+        if (currentAlbum) index = findAlbumIndex(currentAlbum);
+
+        currentIndex = index > 0 ? index : getRandomIndex(albums.length);
+        await updateDisplay();
+    }
+
+    function findAlbumIndex(albumInfo) {
+        const newIndex = albums.findIndex(album => 
+            album.album === albumInfo.album &&
+            album.artist === albumInfo.artist
+        );
+        return newIndex;
+    }
 });
 
 function getRandomIndex(length) {

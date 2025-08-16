@@ -26,17 +26,37 @@ async function getAlbumsFromCollection() {
     return albums;
 }
 
-function updateSortingMethod(method) {
+async function updateSortingMethod(method, albums) {
     sortingMethod = method;
+    const sortedAlbums = await sortCollection(albums);
+
+    return sortedAlbums;
 }
 
 async function sortCollection(albums) {
-    albums.sort((a, b) => {
-        // remove "the" for sorting 
-        const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
-        const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
-        return artistA.localeCompare(artistB) || a.year - b.year; // sort by artist, then year
-    });
+
+    if (sortingMethod === 2) {
+
+        // sort by year
+        albums.sort((a, b) => {
+            // remove "the" for sorting 
+            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            return a.year - b.year || artistA.localeCompare(artistB);
+        });
+    
+        // no dateAdded field being stored yet
+
+    } else {
+
+        // sort by artist
+        albums.sort((a, b) => {
+            // remove "the" for sorting 
+            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            return artistA.localeCompare(artistB) || a.year - b.year;
+        });
+    }
     return albums;
 }
 
