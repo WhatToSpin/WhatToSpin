@@ -18,6 +18,8 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     margin-bottom: 15px;
 }
 
+/* MENU BAR */
+
 .menu-bar {
     position: relative;
     display: flex;
@@ -28,20 +30,24 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
 
 .icon {
     position: absolute;
-    margin-left: 40px;
     display: flex;
+    right: 10px;
     justify-content: center;
     align-items: center;
 }
 
+/* SEARCH */
+
 .search-icon {
+    right: 10px;
+    cursor: pointer;
     border: none;
     background: none;
 }
 
 .search-icon img {
-    height: 18px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
     object-fit: contain;
 }
 
@@ -105,10 +111,11 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     outline: none;
 }
 
+/* INFO */
+
 .info-icon {
-    font-size: 16px;
-    top: -15px;
-    right: 0;
+    top: -9px;
+    right: 70px;
     cursor: pointer;
     position: absolute;
     font-weight: 800;
@@ -117,8 +124,21 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     background: none;
 }
 
+.info-icon img {
+    height: 16px;
+    width: 16px;
+    object-fit: contain;
+}
+
 .info-icon:hover, .info-icon:focus {
-    color: #000;
+    filter: brightness(0.8);
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.info-icon:active {
+    transform: translateY(2px);
+    transition: transform 0.1s ease;
 }
 
 .info-overlay {
@@ -165,11 +185,43 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     margin-left: 40px;
 }
 
+/* SORTING */
+
+.sort-icon {
+    top: -9px;
+    right: 40px;
+    cursor: pointer;
+    position: absolute;
+    font-weight: 800;
+    color: #666;
+    border: none;
+    background: none;
+}
+
+.sort-icon img {
+    height: 16px;
+    width: 16px;
+    object-fit: contain;
+}
+
+.sort-icon:hover, .sort-icon:focus {
+    filter: brightness(0.8);
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.sort-icon:active {
+    transform: translateY(2px);
+    transition: transform 0.1s ease;
+}
+
+/* COVERS */
+
 .rotating-container {
     position: relative;
     width: 300px;
     height: 200px;
-    margin: 30px auto 15px;
+    margin: 40px auto 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -262,7 +314,7 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 25px;
+    margin-top: 15px;
     margin-bottom: 0px;
     min-height: 80px;
 }
@@ -274,9 +326,11 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     overflow: hidden;
 }
 
+/* FUNCTIONS */
+
 .left-button {
     position: absolute;
-    left: 50px;
+    left: 60px;
     bottom: 35px;
     background: none;
     border: none;
@@ -288,7 +342,7 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
 
 .right-button {
     position: absolute;
-    right: 50px;
+    right: 60px;
     bottom: 35px;
     background: none;
     border: none;
@@ -303,6 +357,8 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     justify-content: center;
     margin-bottom: 20px;
 }
+
+/* SHUFFLE */
 
 .shuffle-icon {
     padding: 0;
@@ -330,6 +386,8 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     transition: transform 0.1s ease;
 }
 
+/* ADD ALBUM */
+
 .add-icon {
     height: 24px;
     width: 24px;
@@ -347,6 +405,8 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     transform: translateY(2px);
     transition: transform 0.1s ease;
 }
+
+/* ALBUM INFO */
 
 h1 {
     color: #333;
