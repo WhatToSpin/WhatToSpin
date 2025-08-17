@@ -50,8 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // close behavior
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
             window.close();
         }
     });

@@ -76,10 +76,7 @@ function registerIpcHandlers() {
         }
     });
 
-    ipcMain.handle('update-sorting-method', async (event, method, albums) => {
-        const sortedAlbums = await updateSortingMethod(method, albums);
-        return sortedAlbums;
-    });
+    ipcMain.handle('update-sorting-method', async (event, method) => updateSortingMethod(method) );
 
     ipcMain.handle('notify-album-added', async (event, albumData) => {
         const addAlbumWindow = BrowserWindow.fromWebContents(event.sender);

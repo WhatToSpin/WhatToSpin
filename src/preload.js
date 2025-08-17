@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     updateAlbumInCollection: (albumDataString, updatedAlbumData, newCoverData) => ipcRenderer.invoke('update-album', albumDataString, updatedAlbumData, newCoverData),
 
-    updateSortingMethod: (method, albums) => ipcRenderer.invoke('update-sorting-method', method, albums),
+    updateSortingMethod: (method) => ipcRenderer.invoke('update-sorting-method', method),
 
     openAddAlbumWindow: (currentAlbumCoverColor) => ipcRenderer.invoke('open-add-album-window', currentAlbumCoverColor),
 

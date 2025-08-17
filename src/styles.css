@@ -43,7 +43,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     cursor: pointer;
     border: none;
     background: none;
-    outline: none;
 }
 
 .search-icon img {
@@ -135,7 +134,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     filter: brightness(0.8);
     transform: scale(1.1);
     transition: transform 0.3s ease;
-    outline: none;
 }
 
 .info-icon:active {
@@ -210,7 +208,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     filter: brightness(0.8);
     transform: scale(1.1);
     transition: transform 0.3s ease;
-    outline: none;
 }
 
 .sort-icon:active {
@@ -425,7 +422,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     display: flex;
     align-items: center;
     justify-content: center;
-    outline: none;
 }
 
 .shuffle-icon img {
@@ -452,7 +448,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     width: 24px;
     font-weight: 500;
     font-size: 30px;
-    outline: none;
 }
 
 .add-icon:hover {
