@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* DISPLAY */
 
     async function updateDisplay() {
+        console.log('updating display');
         if (albums.length === 0) {
             albumTitle.textContent = 'No albums found';
             artistName.textContent = '';
@@ -131,6 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (albums.length === 2) {
+            console.log('2 covers');
             showCovers([centerCover, rightCover]);
             hideCovers([wayLeftCover, leftCover, wayRightCover]);
 
@@ -147,10 +149,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (albums.length === 3 || albums.length === 4) {
+            console.log('3 or 4 covers');
             showCovers([centerCover, rightCover, leftCover]);
             hideCovers([wayLeftCover, wayRightCover]);
 
             const current = albums[currentIndex];
+            console.log('current album', albums[currentIndex]);
+
             albumTitle.textContent = current.album;
             artistName.textContent = current.artist;
             year.textContent = current.year;
@@ -161,11 +166,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         if (albums.length >= 5) {
+            console.log('5 or more covers');
             showCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
 
+            console.log('covers should be showing');
             const current = albums[currentIndex];
+            console.log('test');
+            console.log('current album', albums[currentIndex]);
             albumTitle.textContent = current.album;
+            console.log('test1');
             artistName.textContent = current.artist;
+            console.log('test2');
             year.textContent = current.year;
             
             await updateFiveCoverImages();
@@ -819,6 +830,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         try {
+            console.log('current album', albums[currentIndex]);
             await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], coverColors);
         } catch (error) {
             console.error('Error opening album focus window:', error);
@@ -874,21 +886,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.electronAPI.onAlbumAdded(async (albumData) => {
 
         wasCollectionUpdated = true;
+        console.log('albumData', albumData);
 
         // store the current album before refreshing the collection
-        const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;
         albums = await window.electronAPI.getAlbumsFromCollection();
 
         if (!albumData) {
             // album was deleted
-            currentIndex = currentIndex > 0 ? currentIndex : 0;
+            console.log('album was deleted');
+            currentIndex = (currentIndex > 0 && currentIndex < albums.length) ? currentIndex : 0;
         } else {
             // try to find the updated album
+            console.log('album was not deleted');
             let newIndex = findAlbumIndex(albumData);
             if (newIndex > -1 && newIndex < albums.length) {
                 currentIndex = newIndex;
             } else {
-                currentIndex = currentIndex < albums.length ? currentIndex : 0;
+                currentIndex = (currentIndex < albums.length && currentIndex > -1) ? currentIndex : 0;
             }
         }
 
@@ -904,7 +918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let index;
         if (currentAlbum) index = findAlbumIndex(currentAlbum);
 
-        currentIndex = index > 0 ? index : getRandomIndex(albums.length);
+        currentIndex = (index >= 0 && index < albums.length) ? index : getRandomIndex(albums.length);
         await updateDisplay();
     }
 
