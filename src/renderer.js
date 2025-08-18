@@ -553,19 +553,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function showAlbumInfo() {
         if (albums.length === 0) {
-            collectionSize.innerHTML = `Add an album to start tracking your collection stats`
+            collectionSize.innerHTML = `There is no information about your collection`
             infoOverlay.classList.add('show');
             return
         }
 
         const collectionStats = getCollectionStats();
 
-        collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> albums in your collection`;
-        numArtists.innerHTML = `There are <b>${collectionStats.numArtists}</b> different artists in your collection`;
-        topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
-        chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
-
-        createAlbumChart(collectionStats.albumsByYear);
+        if (albums.length === 1) { // grammar
+            collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> album in your collection`;
+            numArtists.innerHTML = `There is <b>${collectionStats.numArtists}</b> different artist in your collection`;
+            topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> album`;
+        } else {
+            collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> albums in your collection`;
+            numArtists.innerHTML = `There are <b>${collectionStats.numArtists}</b> different artists in your collection`;
+            topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
+            if (collectionStats.minYear !== Infinity && collectionStats.maxYear !== 0) {
+                chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
+                createAlbumChart(collectionStats.albumsByYear);
+            } else {
+                chartIntro.innerHTML = ''
+            }
+        }
 
         infoOverlay.classList.add('show');
     }
@@ -598,8 +607,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, {});
 
         // min and max year
-        const minYear = Math.min(...Object.keys(albumsByYear).map(Number).filter(year => year >= 1900)); // see below
-        const maxYear = Math.max(...Object.keys(albumsByYear).map(Number));
+        let minYear = Math.min(...Object.keys(albumsByYear).map(Number).filter(year => year >= 1900)); // see below
+        let maxYear = Math.max(...Object.keys(albumsByYear).map(Number));
 
         // reset cached stats
         cachedStats = {
@@ -629,7 +638,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const decadeData = {};
         Object.entries(albumsByYear).forEach(([year, count]) => {
-            if (year >= 1900) { // the first modern vinyl record was released in 1948, so this is generous
+            if (year >= 190) { // the first modern vinyl record was released in 1948, so this is generous
                 const decade = Math.floor(Number(year) / 10) * 10;
                 decadeData[decade] = (decadeData[decade] || 0) + count;
             }
