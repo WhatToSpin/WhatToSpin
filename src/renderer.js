@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelIcon = document.getElementById('cancelIcon');
 
     // info page elements
-    const infoButton = document.getElementById('infoIcon');    
+    const infoIcon = document.getElementById('infoIcon');    
     const infoOverlay = document.getElementById('infoOverlay');
     const collectionSize = document.getElementById('collectionSize');
     const numArtists = document.getElementById('numArtists');
@@ -321,20 +321,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     /* SEARCH */
 
-    searchIcon.addEventListener('click', () => {
-        searchBar.classList.toggle('hidden');
+
+    searchIcon.addEventListener('click', (event) => {
+        searchBar.classList.remove('hidden');
+        searchIcon.classList.add('hidden');
+        cancelIcon.classList.remove('hidden');
         searchInput.focus();
     });
 
-
     searchInput.addEventListener('keydown', (event) => {
         if (event.key === "Enter") {
-            
-            // replace search icon with cancel icon
-            searchIcon.classList.add('hidden');
-            cancelIcon.classList.remove('hidden');
-
-            // handle input
             const input = searchInput.value.trim();
             searchInput.blur();
             handleSearch(input);
@@ -342,9 +338,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     cancelIcon.addEventListener('click', async () => {
+
         searchInput.value = '';
         cancelIcon.classList.add('hidden');
         searchIcon.classList.remove('hidden');
+        searchBar.classList.add('hidden');
 
         // save current album
         let centerAlbum = null;
@@ -363,12 +361,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         await updateDisplay();
-    });
-
-    document.addEventListener('click', (event) => {
-        if (!searchBar.classList.contains('hidden') && !event.target.closest('.search-icon') && !event.target.closest('.search-bar') && searchInput.value == '') {
-            searchBar.classList.add('hidden');
-        }
     });
 
     async function handleSearch(input) {
@@ -529,7 +521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     /* INFORMATION PAGE */
 
-    infoButton.addEventListener('click', async () => {
+    infoIcon.addEventListener('click', async () => {
         if (infoDisplayed) {
             infoOverlay.classList.remove('show');
             infoDisplayed = false;
