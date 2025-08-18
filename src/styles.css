@@ -215,61 +215,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     transition: transform 0.1s ease;
 }
 
-.sort-menu {
-    position: absolute;
-    top: -9px;
-    right: 40px;
-    display: inline-block;
-}
-
-.sort-menu-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 25px;
-    background-color: #f9f9f9;
-    min-width: 120px;
-    box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.2);
-    z-index: 10000;
-    border-radius: 4px;
-}
-
-.sort-menu-content a {
-    color: black;
-    padding: 12px 16px;
-    padding-left: 40px;
-    padding-right: 40px;
-    text-decoration: none;
-    display: block;
-    cursor: pointer;
-    user-select: none;
-    -webkit-app-region: no-drag;
-}
-
-.sort-menu-content a:hover {
-    background-color: #f1f1f1;
-}
-
-.sort-menu-content a.selected {
-    background-image: url('assets/icons/check.png');
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 16px;
-    padding-left: 40px;
-    color: #333;
-    font-weight: 500;
-}
-
-.sort-menu-content.show {
-    display: block;
-}
-
-.sort-divider-line {
-    height: 1px;
-    background-color: #e0e0e0;
-    margin: 6px 12px;
-}
-
 /* COVERS */
 
 .rotating-container {
