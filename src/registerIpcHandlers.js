@@ -4,7 +4,8 @@ const {
     getAlbumsFromCollection, 
     deleteAlbumFromCollection, 
     updateAlbumInCollection,
-    updateSortingMethod
+    loadOptionsFile,
+    updateSortingOptions
 } = require('../utils/albumManager');
 const { BrowserWindow } = require('electron');
 const path = require('path');
@@ -76,11 +77,21 @@ function registerIpcHandlers() {
         }
     });
 
-    ipcMain.handle('update-sorting-method', async (event, options, albums) => {
+    ipcMain.handle('load-options', async () => {
         try {
-            const sortedAlbums = await updateSortingMethod(options, albums);
+            const options = await loadOptionsFile()
+            return options;
+        } catch (error) {
+            console.error(`Error loading options file: ${error}`)
+            return {};
+        }
+    });
+
+    ipcMain.handle('update-sorting-options', async (event, sortingOptions, albums) => {
+        try {
+            const sortedAlbums = await updateSortingOptions(sortingOptions, albums);
             if (!sortedAlbums) {
-                console.error('updateSortingMethod returned null/undefined');
+                console.error('updateSortingOptions returned null/undefined');
                 return albums;
             }
             

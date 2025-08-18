@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const submitAlbumButton = document.getElementById('submit-button');
     submitAlbumButton.style.setProperty('font-weight', '600', 'important');
     
-    if (currentAlbumCoverColor) {
+    if (coverColors) {
         submitAlbumButton.style.setProperty('background-color', coverColors.cover, 'important')
         submitAlbumButton.style.setProperty('color', coverColors.text, 'important');
 

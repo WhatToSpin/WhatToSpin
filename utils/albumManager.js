@@ -4,10 +4,13 @@ const albumArt = require('album-art');
 const path = require('path');
 const filepath = require('./filepath');
 
-let sortingOptions = {
-    method: 'artist', // 'artist', 'year', 'dateAdded'
-    order: 'ascending' // 'ascending', 'descending'
+// default sorting options
+let savedSortingOptions = {
+    method: 'artist',
+    order: 'ascending'
 }
+
+/* ALBUMS HANDLING */
 
 async function writeAlbumsToCollection(albums) {
     try { 
@@ -33,45 +36,6 @@ async function getAlbumsFromCollection() {
     return albums;
 }
 
-async function updateSortingMethod(options, albums) {
-    let sortedAlbums = albums;
-    if (options.method !== sortingOptions.method) {
-        sortingOptions.method = options.method;
-        sortedAlbums = await sortCollection(albums);
-    } else if (options.order !== sortingOptions.order) {
-        sortingOptions.order = options.order;
-        sortedAlbums = sortedAlbums.reverse();
-    }
-    await writeAlbumsToCollection(sortedAlbums);
-    return sortedAlbums;
-}
-
-async function sortCollection(albums) {
-
-    if (sortingOptions.method === 'year') {
-
-        // sort by year
-        albums.sort((a, b) => {
-            // remove "the" for sorting 
-            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
-            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
-            return a.year - b.year || artistA.localeCompare(artistB);
-        });
-    
-        // no dateAdded field being stored yet
-
-    } else {
-
-        // sort by artist
-        albums.sort((a, b) => {
-            // remove "the" for sorting 
-            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
-            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
-            return artistA.localeCompare(artistB) || a.year - b.year;
-        });
-    }
-    return albums;
-}
 
 async function addAlbumToCollection(albumData) {
     try {
@@ -84,15 +48,15 @@ async function addAlbumToCollection(albumData) {
         const album = String(albumData.album || '').trim();
         const artist = String(albumData.artist || '').trim();
         const year = albumData.year ? String(albumData.year).trim() : '';
+        const dateAdded = Date.now();
 
         if (!album || !artist) {
             throw new Error('Album name and artist name are required');
         }
 
         // make sure album does not already exist
-        const albumsData = albums;
-        if (albumsData.length !== 0) {
-            const existingAlbum = albumsData.find(
+        if (albums.length !== 0) {
+            const existingAlbum = albums.find(
                 (a) => a.album.toLowerCase() === album.toLowerCase() &&
                 a.artist.toLowerCase() === artist.toLowerCase()
             );
@@ -110,6 +74,7 @@ async function addAlbumToCollection(albumData) {
             album: album,
             artist: artist,
             year: year,
+            dateAdded: dateAdded,
             coverPath: coverPath,
         };
 
@@ -296,10 +261,85 @@ async function generateCoverPath(album, artist) {
     return coverPath;
 }
 
+/* SORTING HANDLING */
+
+async function loadOptionsFile() {
+    try {
+        savedSortingOptions = await fsPromises.readFile(path.join(filepath.userData, 'options.json'), 'utf-8');
+        savedSortingOptions = JSON.parse(savedSortingOptions);
+    } catch (error) {
+        await fsPromises.mkdir(path.dirname(path.join(filepath.userData, 'options.json')), { recursive: true });
+        await writeAlbumsToCollection(savedSortingOptions);
+    }
+    return savedSortingOptions;
+}
+
+async function saveOptions(savedSortingOptions) {
+    try { 
+        await fsPromises.writeFile(
+            path.join(filepath.userData, 'options.json'),
+            JSON.stringify(savedSortingOptions, null, 2)
+        );
+    } catch (error) {
+        console.log(`Error saving options to options.json: ${error}`);
+    }
+}
+
+async function updateSortingOptions(sortingOptions, albums) {
+    let sortedAlbums = albums;
+    if (sortingOptions.method !== savedSortingOptions.method) {
+        savedSortingOptions.method = sortingOptions.method;
+        sortedAlbums = await sortCollection(albums);
+    } else if (sortingOptions.order !== savedSortingOptions.order) {
+        savedSortingOptions.order = sortingOptions.order;
+        sortedAlbums = sortedAlbums.reverse();
+    }
+    await writeAlbumsToCollection(sortedAlbums);
+    await saveOptions(savedSortingOptions);
+    return sortedAlbums;
+}
+
+async function sortCollection(albums) {
+
+    if (savedSortingOptions.method === 'year') {
+
+        // sort by year
+        albums.sort((a, b) => {
+            // remove "the" for sorting 
+            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            return a.year - b.year || artistA.localeCompare(artistB);
+        });
+    
+    } else if (savedSortingOptions.method === 'dateAdded') {
+
+        // sort by date added
+        albums.sort((a, b) => { 
+            return a.dateAdded - b.dateAdded;
+        });
+    } else {
+
+        // sort by artist
+        albums.sort((a, b) => {
+            // remove "the" for sorting 
+            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            return artistA.localeCompare(artistB) || a.year - b.year;
+        });
+    }
+
+    if (savedSortingOptions.order === 'descending') {
+        albums = albums.reverse()
+    }
+
+    return albums;
+}
+
 module.exports = {
     addAlbumToCollection,
     getAlbumsFromCollection, 
     deleteAlbumFromCollection,
     updateAlbumInCollection,
-    updateSortingMethod
+    loadOptionsFile,
+    updateSortingOptions
 };

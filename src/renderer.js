@@ -42,12 +42,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     let wasCollectionUpdated = false;
     let allowShuffle = true;
     let allowCoverFocus = true;
+
+    // default sorting options
     let sortingOptions = {
-        method: 'artist', // 'artist', 'year', 'dateAdded'
-        order: 'ascending' // 'ascending', 'descending'
+        method: 'artist',
+        order: 'ascending'
     }
 
-    // add/shuffle buttons
+    // function buttons
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
 
@@ -61,6 +63,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         text: '#000000'
     }
     
+    // set up sorting
+    try {
+        sortingOptions = await window.electronAPI.loadOptionsFile();
+        if (!sortingOptions) {
+            sortingOptions = {
+                method: 'artist',
+                order: 'ascending'
+            }
+        }
+    } catch (error) {
+        console.error('Error loading options:', error);
+    }
+
+    // set up covers
     try {
         albums = await window.electronAPI.getAlbumsFromCollection();
         if (albums.length > 0) {
@@ -76,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDisplay();
     }
 
-    /* DISPLAY LOGIC */
+    /* DISPLAY */
 
     async function updateDisplay() {
         if (albums.length === 0) {
@@ -303,10 +319,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    /* SEARCH LOGIC */
+    /* SEARCH */
 
     searchIcon.addEventListener('click', () => {
-        searchBar.classList.toggle('hidden')
+        searchBar.classList.toggle('hidden');
+        searchInput.focus();
     });
 
 
@@ -510,7 +527,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return results;
     }
 
-    /* INFORMATION PAGE LOGIC */
+    /* INFORMATION PAGE */
 
     infoButton.addEventListener('click', async () => {
         if (infoDisplayed) {
@@ -525,6 +542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && infoDisplayed) {
             event.preventDefault();
+            event.stopPropagation();
             infoOverlay.classList.remove('show');
             infoDisplayed = false;
         }
@@ -548,7 +566,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         infoOverlay.classList.add('show');
     }
-
 
     function getCollectionStats() {
         if (cachedStats && !wasCollectionUpdated) {
@@ -720,7 +737,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     sortByArtist.addEventListener('click', async () => {
         if (sortingOptions.method !== 'artist') {
             sortingOptions.method = 'artist';
-            await updateSorting(sortingOptions);
+            await updateSorting();
         } 
 
         sortMenuContent.classList.remove('show');
@@ -729,7 +746,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     sortByYear.addEventListener('click', async () => {
         if (sortingOptions.method !== 'year') {
             sortingOptions.method = 'year';
-            await updateSorting(sortingOptions);
+            await updateSorting();
         }
 
         sortMenuContent.classList.remove('show');
@@ -738,7 +755,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     sortByDateAdded.addEventListener('click', async () => {
         if (sortingOptions.method !== 'dateAdded') {
             sortingOptions.method = 'dateAdded';
-            await updateSorting(sortingOptions);
+            await updateSorting();
+        }
+
+        sortMenuContent.classList.remove('show');
+    });
+
+    ascending.addEventListener('click', async () => {
+        if (sortingOptions.order !== 'ascending') {
+            sortingOptions.order = 'ascending';
+            await updateSorting();
+        }
+
+        sortMenuContent.classList.remove('show');
+    });
+
+    descending.addEventListener('click', async () => {
+        if (sortingOptions.order !== 'descending') {
+            sortingOptions.order = 'descending';
+            await updateSorting();
         }
 
         sortMenuContent.classList.remove('show');
@@ -798,7 +833,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    /* ADD ALBUM LOGIC */
+    /* ADD ALBUM */
 
     addAlbumButton.addEventListener('click', async () => {
         try {
@@ -809,7 +844,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    /* COVER FOCUS/MOVEMENT LOGIC */
+    /* COVER FOCUS/MOVEMENT */
 
     centerCover.addEventListener('click', async () => {
         if (albums.length === 0 || !allowCoverFocus) return;
@@ -841,14 +876,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDisplay();
     });
 
-    function findAlbumIndex(albumInfo) {
-        const newIndex = albums.findIndex(album => 
-            album.album === albumInfo.album &&
-            album.artist === albumInfo.artist
-        );
-        return newIndex;
-    }
-
     /* CALLBACK FOR COLLECTION UPDATES */
 
     // listen for an album added
@@ -859,7 +886,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // store the current album before refreshing the collection
         const currentAlbum = albums.length > 0 ? albums[currentIndex] : null;
         albums = await window.electronAPI.getAlbumsFromCollection();
-        window.electronAPI.debug(currentIndex);
 
         if (!albumData) {
             // album was deleted
@@ -879,9 +905,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     /* HELPER FUNCTIONS */
 
-    async function updateSorting(options) {
+    async function updateSorting() {
         const currentAlbum = albums[currentIndex];
-        albums = await window.electronAPI.updateSortingMethod(options, albums);
+        albums = await window.electronAPI.updateSortingOptions(sortingOptions, albums);
 
         let index;
         if (currentAlbum) index = findAlbumIndex(currentAlbum);
