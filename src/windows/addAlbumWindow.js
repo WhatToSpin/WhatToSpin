@@ -1,31 +1,18 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    let currentAlbumCoverColor = urlParams.get('currentAlbumCoverColor');
-    
-    if (currentAlbumCoverColor) {
-        currentAlbumCoverColor = decodeURIComponent(currentAlbumCoverColor);
-    }
+    let coverColors = JSON.parse(urlParams.get('coverColors'));
 
     const submitAlbumButton = document.getElementById('submit-button');
     submitAlbumButton.style.setProperty('font-weight', '600', 'important');
     
     if (currentAlbumCoverColor) {
-        submitAlbumButton.style.setProperty('background-color', currentAlbumCoverColor, 'important');
-
-        // set text color 
-        const color = currentAlbumCoverColor.replace('#', '');        
-        const r = parseInt(color.slice(0, 2), 16);
-        const g = parseInt(color.slice(2, 4), 16);
-        const b = parseInt(color.slice(4, 6), 16);
-                
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
-        submitAlbumButton.style.setProperty('color', textColor, 'important');
+        submitAlbumButton.style.setProperty('background-color', coverColors.cover, 'important')
+        submitAlbumButton.style.setProperty('color', coverColors.text, 'important');
 
         const style = document.createElement('style');
         style.innerHTML = `
             .input:focus {
-                border-color: ${currentAlbumCoverColor} !important;
+                border-color: ${coverColors.cover} !important;
                 border-width: 2px !important;
                 padding: 11px !important;
                 box-shadow: none !important;

@@ -26,12 +26,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const topArtist = document.getElementById('topArtist');
     const chartIntro = document.getElementById('chartIntro');
 
+    // sorting elements
+    const sortIcon = document.getElementById('sortIcon');
+    const sortMenuContent = document.getElementById('sortMenuContent');
+    const sortByArtist = document.getElementById('sortByArtist');
+    const sortByYear = document.getElementById('sortByYear');
+    const sortByDateAdded = document.getElementById('sortByDateAdded');
+    const ascending = document.getElementById('ascending');
+    const descending = document.getElementById('descending');
+
+    // state variables
     let infoDisplayed = false;
     let cachedStats = null;
     let cachedChart = null;
     let wasCollectionUpdated = false;
     let allowShuffle = true;
     let allowCoverFocus = true;
+    let sortingOptions = {
+        method: 'artist', // 'artist', 'year', 'dateAdded'
+        order: 'ascending' // 'ascending', 'descending'
+    }
 
     // add/shuffle buttons
     const addAlbumButton = document.getElementById('addAlbumButton');
@@ -42,7 +56,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let albums = [];
     let currentIndex = 0;
     let savedIndex = 0;
-    let currentAlbumCoverColor = '#cfcfcf'; // for button styling
+    let coverColors = { // for button styling
+        cover: '#cfcfcf', 
+        text: '#000000'
+    }
     
     try {
         albums = await window.electronAPI.getAlbumsFromCollection();
@@ -75,7 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             wayRightCover.src = '';
             
             hideCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
-            currentAlbumCoverColor = '#cfcfcf'; // reset cover color
+            coverColors.cover = '#cfcfcf'; // reset cover colors
+            coverColors.text = '#000000';
 
             return;
         }
@@ -259,16 +277,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
-                currentAlbumCoverColor = dominantColor;
+                // set text color 
+                const color = dominantColor.replace('#', '');        
+                const r = parseInt(color.slice(0, 2), 16);
+                const g = parseInt(color.slice(2, 4), 16);
+                const b = parseInt(color.slice(4, 6), 16);
+                        
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
+
+                coverColors.cover = dominantColor;
+                coverColors.text = textColor;
+                
             } catch (error) {
                 console.error('Error processing image for color extraction:', error);
-                currentAlbumCoverColor = '#cfcfcf';
+                coverColors.cover = '#cfcfcf';
+                coverColors.text = '#000000';
             }
         };
 
         img.onerror = () => {
             console.error('Failed to load image for color extraction:', albumCoverPath);
-            currentAlbumCoverColor = '#cfcfcf';
+            coverColors.cover = '#cfcfcf';
+            coverColors.text = '#000000';
         };
     }
 
@@ -465,8 +496,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if (token.includes('from:') || token.includes('to:')) {
                 const [key, value] = token.split(':');
                 if (!isNaN(value)) {
-                    if (key === 'from:') results.ranges[0] = year; 
-                    else if (key === 'to:') results.ranges[1] = year;
+                    if (key === 'from:') results.ranges[0] = parseInt(value); 
+                    else if (key === 'to:') results.ranges[1] = parseInt(value);
                 }
             }
 
@@ -657,7 +688,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         cachedChart = new Chart(ctx, config);
     }
 
-    /* SHUFFLE COLLECTION LOGIC */
+    /* SORTING */
+
+    sortIcon.addEventListener('click', () => {
+        // prep menu before showing
+        if (!sortMenuContent.classList.contains('show')) {
+            if (sortingOptions.method === 'artist') {
+                sortByArtist.classList.add('selected');
+                sortByYear.classList.remove('selected');
+                sortByDateAdded.classList.remove('selected');
+            } else if (sortingOptions.method === 'year') {
+                sortByArtist.classList.remove('selected');
+                sortByYear.classList.add('selected');
+                sortByDateAdded.classList.remove('selected');
+            } else if (sortingOptions.method === 'dateAdded') {
+                sortByArtist.classList.remove('selected');
+                sortByYear.classList.remove('selected');
+                sortByDateAdded.classList.add('selected');
+            }
+            if (sortingOptions.order === 'ascending') {
+                ascending.classList.add('selected');
+                descending.classList.remove('selected');
+            } else if (sortingOptions.order === 'descending') {
+                ascending.classList.remove('selected');
+                descending.classList.add('selected');
+            }
+        }
+        sortMenuContent.classList.toggle('show');
+    });
+
+    sortByArtist.addEventListener('click', async () => {
+        if (sortingOptions.method !== 'artist') {
+            sortingOptions.method = 'artist';
+            await updateSorting(sortingOptions);
+        } 
+
+        sortMenuContent.classList.remove('show');
+    });
+
+    sortByYear.addEventListener('click', async () => {
+        if (sortingOptions.method !== 'year') {
+            sortingOptions.method = 'year';
+            await updateSorting(sortingOptions);
+        }
+
+        sortMenuContent.classList.remove('show');
+    });
+
+    sortByDateAdded.addEventListener('click', async () => {
+        if (sortingOptions.method !== 'dateAdded') {
+            sortingOptions.method = 'dateAdded';
+            await updateSorting(sortingOptions);
+        }
+
+        sortMenuContent.classList.remove('show');
+    });
+
+    /* SHUFFLE COLLECTION */
 
     shuffleButton.addEventListener('click', async () => {
         if (albums.length === 0 || !allowShuffle) return;
@@ -705,7 +792,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         try {
-            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
+            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], coverColors);
         } catch (error) {
             console.error('Error opening album focus window:', error);
         }
@@ -715,7 +802,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addAlbumButton.addEventListener('click', async () => {
         try {
-            await window.electronAPI.openAddAlbumWindow(currentAlbumCoverColor);
+            await window.electronAPI.openAddAlbumWindow(coverColors);
         } catch (error) {
             console.error('Error adding album:', error);
             alert(`Failed to add album. Please try again. Error: ${error.message}`);
@@ -727,7 +814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     centerCover.addEventListener('click', async () => {
         if (albums.length === 0 || !allowCoverFocus) return;
         try {
-            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], currentAlbumCoverColor);
+            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], coverColors);
         } catch (error) {
             console.error('Error opening album focus window:', error);
             alert('Failed to open album focus window. Please try again.');
@@ -789,6 +876,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await updateDisplay();
     });
+
+    /* HELPER FUNCTIONS */
+
+    async function updateSorting(options) {
+        const currentAlbum = albums[currentIndex];
+        albums = await window.electronAPI.updateSortingMethod(options, albums);
+
+        let index;
+        if (currentAlbum) index = findAlbumIndex(currentAlbum);
+
+        currentIndex = index > 0 ? index : getRandomIndex(albums.length);
+        await updateDisplay();
+    }
+
+    function findAlbumIndex(albumInfo) {
+        const newIndex = albums.findIndex(album => 
+            album.album === albumInfo.album &&
+            album.artist === albumInfo.artist
+        );
+        return newIndex;
+    }
 });
 
 function getRandomIndex(length) {

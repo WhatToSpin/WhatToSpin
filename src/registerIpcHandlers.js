@@ -76,7 +76,20 @@ function registerIpcHandlers() {
         }
     });
 
-    ipcMain.handle('update-sorting-method', async (event, method) => updateSortingMethod(method) );
+    ipcMain.handle('update-sorting-method', async (event, options, albums) => {
+        try {
+            const sortedAlbums = await updateSortingMethod(options, albums);
+            if (!sortedAlbums) {
+                console.error('updateSortingMethod returned null/undefined');
+                return albums;
+            }
+            
+            return sortedAlbums;
+        } catch (error) {
+            console.error('Error updating sorting method:', error);
+            return albums;
+        }
+    });
 
     ipcMain.handle('notify-album-added', async (event, albumData) => {
         const addAlbumWindow = BrowserWindow.fromWebContents(event.sender);
@@ -94,7 +107,7 @@ function registerIpcHandlers() {
         return { success: true };
     });
 
-    ipcMain.handle('open-add-album-window', async (event, currentAlbumCoverColor) => {
+    ipcMain.handle('open-add-album-window', async (event, coverColors) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
         
         const [mainX, mainY] = mainWindow.getPosition();
@@ -122,9 +135,8 @@ function registerIpcHandlers() {
             }
         });
 
-        const encodedColor = encodeURIComponent(currentAlbumCoverColor || '#cfcfcf');
         addAlbumWindow.loadFile(path.join(__dirname, './windows/addAlbumWindow.html'), { 
-            query: { currentAlbumCoverColor: encodedColor } 
+            query: { coverColors: JSON.stringify(coverColors) } 
         });
 
         addAlbumWindow.on('closed', () => {
@@ -132,7 +144,7 @@ function registerIpcHandlers() {
         });
     });
 
-    ipcMain.handle('open-album-focus-window', async (event, albumData, albumCoverColor) => {
+    ipcMain.handle('open-album-focus-window', async (event, albumData, coverColors) => {
         const mainWindow = BrowserWindow.fromWebContents(event.sender);
 
         const [mainX, mainY] = mainWindow.getPosition();
@@ -163,7 +175,7 @@ function registerIpcHandlers() {
         albumFocusWindow.loadFile(path.join(__dirname, './windows/albumFocusWindow.html'), {
             query: { 
                 albumData: JSON.stringify(albumData), 
-                albumCoverColor: encodeURIComponent(albumCoverColor) 
+                coverColors: JSON.stringify(coverColors) 
             }
         });
         
@@ -172,7 +184,7 @@ function registerIpcHandlers() {
         });
     });
 
-    ipcMain.handle('open-edit-album-window', async (event, albumData, albumCoverColor) => {
+    ipcMain.handle('open-edit-album-window', async (event, albumData, coverColors) => {
         const albumFocusWindow = BrowserWindow.fromWebContents(event.sender);
         const mainWindow = albumFocusWindow.getParentWindow();
 
@@ -204,7 +216,7 @@ function registerIpcHandlers() {
         editAlbumWindow.loadFile(path.join(__dirname, './windows/editAlbumWindow.html'), {
             query: { 
                 albumData: JSON.stringify(albumData),
-                albumCoverColor: encodeURIComponent(albumCoverColor)
+                coverColors: JSON.stringify(coverColors)
             }
         });
 

@@ -1,29 +1,21 @@
 const urlParams = new URLSearchParams(window.location.search);
-const albumCoverColor = decodeURIComponent(urlParams.get('albumCoverColor'));  
+const coverColors = JSON.parse(urlParams.get('coverColors'));  
 const MAX_COVER_DIMENSION = 1000; // 1000 x 1000
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-if (albumCoverColor) {
+if (coverColors) {
     const style = document.createElement('style');
-    
-    const color = albumCoverColor.replace('#', '');        
-    const r = parseInt(color.slice(0, 2), 16);
-    const g = parseInt(color.slice(2, 4), 16);
-    const b = parseInt(color.slice(4, 6), 16);
-            
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
     
     style.innerHTML = `
         #saveChanges {
-            background-color: ${albumCoverColor} !important;
-            color: ${textColor} !important;
+            background-color: ${coverColors.cover} !important;
+            color: ${coverColors.text} !important;
             font-weight: bold !important;
         }
         h1:focus,
         h2:focus,
         p:focus {
-            border-color: ${albumCoverColor} !important;
+            border-color: ${coverColors.cover} !important;
         }
     `;
     

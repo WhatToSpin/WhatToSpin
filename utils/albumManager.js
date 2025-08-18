@@ -4,14 +4,21 @@ const albumArt = require('album-art');
 const path = require('path');
 const filepath = require('./filepath');
 
-/*
-    SORTING OPTIONS:
-    1 - by artist, then discography
-    2 - by year
-    3 - by date added
-*/
+let sortingOptions = {
+    method: 'artist', // 'artist', 'year', 'dateAdded'
+    order: 'ascending' // 'ascending', 'descending'
+}
 
-let sortingMethod = 1; // default
+async function writeAlbumsToCollection(albums) {
+    try { 
+        await fsPromises.writeFile(
+            path.join(filepath.userData, 'collection.json'),
+            JSON.stringify(albums, null, 2)
+        );
+    } catch (error) {
+        console.log(`Error saving albums to collection.json: ${error}`);
+    }
+}
 
 async function getAlbumsFromCollection() {
     let albums;
@@ -21,22 +28,48 @@ async function getAlbumsFromCollection() {
     } catch (error) {
         albums = [];
         await fsPromises.mkdir(path.dirname(path.join(filepath.userData, 'collection.json')), { recursive: true });
-        await fsPromises.writeFile(path.join(filepath.userData, 'collection.json'), JSON.stringify(albums, null, 2));
+        await writeAlbumsToCollection(albums);
     }
     return albums;
 }
 
-function updateSortingMethod(method) {
-    sortingMethod = method;
+async function updateSortingMethod(options, albums) {
+    let sortedAlbums = albums;
+    if (options.method !== sortingOptions.method) {
+        sortingOptions.method = options.method;
+        sortedAlbums = await sortCollection(albums);
+    } else if (options.order !== sortingOptions.order) {
+        sortingOptions.order = options.order;
+        sortedAlbums = sortedAlbums.reverse();
+    }
+    await writeAlbumsToCollection(sortedAlbums);
+    return sortedAlbums;
 }
 
 async function sortCollection(albums) {
-    albums.sort((a, b) => {
-        // remove "the" for sorting 
-        const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
-        const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
-        return artistA.localeCompare(artistB) || a.year - b.year; // sort by artist, then year
-    });
+
+    if (sortingOptions.method === 'year') {
+
+        // sort by year
+        albums.sort((a, b) => {
+            // remove "the" for sorting 
+            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            return a.year - b.year || artistA.localeCompare(artistB);
+        });
+    
+        // no dateAdded field being stored yet
+
+    } else {
+
+        // sort by artist
+        albums.sort((a, b) => {
+            // remove "the" for sorting 
+            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
+            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            return artistA.localeCompare(artistB) || a.year - b.year;
+        });
+    }
     return albums;
 }
 
@@ -83,10 +116,7 @@ async function addAlbumToCollection(albumData) {
         albums.push(newAlbum);
         albums = await sortCollection(albums);
 
-        await fsPromises.writeFile(
-            path.join(filepath.userData, 'collection.json'),
-            JSON.stringify(albums, null, 2)
-        );
+        await writeAlbumsToCollection(albums);
 
         return { success: true  };
 
@@ -192,10 +222,7 @@ async function deleteAlbumFromCollection(albumData) {
     }
     
     // write updated collection
-    await fsPromises.writeFile(
-        path.join(filepath.userData, 'collection.json'),
-        JSON.stringify(albums, null, 2)
-    );
+    await writeAlbumsToCollection(albums);
 
     return { success: true, isEmpty: albums.length === 0 };
 }
@@ -253,10 +280,7 @@ async function updateAlbumInCollection(oldAlbumData, newAlbumData, newCoverData)
     }
 
     // rewrite to collection.json
-    await fsPromises.writeFile(
-        path.join(filepath.userData, 'collection.json'),
-        JSON.stringify(albums, null, 2)
-    );
+    await writeAlbumsToCollection(albums);
 
     return { success: true, updatedAlbum: albums[albumIndex] };
 }

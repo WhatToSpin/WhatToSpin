@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const albumDataString = urlParams.get('albumData');
-    const albumCoverColor = decodeURIComponent(urlParams.get('albumCoverColor'));
+    const coverColors = JSON.parse(urlParams.get('coverColors'));
 
     const options = document.getElementById('options');
     const dropdownContent = document.getElementById('dropdownContent');
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     editLink.addEventListener('click', () => {
-        window.electronAPI.openEditAlbumWindow(albumData, albumCoverColor);
+        window.electronAPI.openEditAlbumWindow(albumData, coverColors);
         dropdownContent.classList.remove('show');
     });
 
