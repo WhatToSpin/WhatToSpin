@@ -35,26 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ascending = document.getElementById('ascending');
     const descending = document.getElementById('descending');
 
-    // state variables
-    let infoDisplayed = false;
-    let cachedStats = null;
-    let cachedChart = null;
-    let wasCollectionUpdated = false;
-    let allowShuffle = true;
-    let allowCoverFocus = true;
-
-    // default sorting options
-    let sortingOptions = {
-        method: 'artist',
-        order: 'ascending'
-    }
-
     // function buttons
     const addAlbumButton = document.getElementById('addAlbumButton');
     const shuffleButton = document.getElementById('shuffleButton');
 
-    const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
-    
+    // collection variables
     let albums = [];
     let currentIndex = 0;
     let savedIndex = 0;
@@ -62,6 +47,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         cover: '#cfcfcf', 
         text: '#000000'
     }
+    let wasCollectionUpdated = false;
+
+    // other function variables
+    let infoDisplayed = false;
+    let cachedStats = null;
+    let cachedChart = null;
+    let allowShuffle = true;
+    let allowCoverFocus = true;
+    let isSearch = false;
+
+    // default sorting options
+    let sortingOptions = {
+        method: 'artist',
+        order: 'ascending'
+    }
+    
+    const UNKNOWN_COVER_PATH = await window.electronAPI.getUnknownCoverPath();
     
     // set up sorting
     try {
@@ -80,9 +82,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         albums = await window.electronAPI.getAlbumsFromCollection();
         if (albums.length > 0) {
-            currentIndex = getRandomIndex(albums.length); // start with a random album
+            currentIndex = getRandomIndex(albums.length);
         } else {
-            currentIndex = 0; // no albums yet
+            currentIndex = 0;
         }
         await updateDisplay();
 
@@ -92,10 +94,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         await updateDisplay();
     }
 
+    // cache initial collection stats
+    try {
+        cachedStats = getCollectionStats();
+    } catch (error) {
+        cachedStats = null;
+    }
+
     /* DISPLAY */
 
     async function updateDisplay() {
-        console.log('updating display');
         if (albums.length === 0) {
             albumTitle.textContent = 'No albums found';
             artistName.textContent = '';
@@ -132,7 +140,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (albums.length === 2) {
-            console.log('2 covers');
             showCovers([centerCover, rightCover]);
             hideCovers([wayLeftCover, leftCover, wayRightCover]);
 
@@ -149,13 +156,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (albums.length === 3 || albums.length === 4) {
-            console.log('3 or 4 covers');
             showCovers([centerCover, rightCover, leftCover]);
             hideCovers([wayLeftCover, wayRightCover]);
 
             const current = albums[currentIndex];
-            console.log('current album', albums[currentIndex]);
-
             albumTitle.textContent = current.album;
             artistName.textContent = current.artist;
             year.textContent = current.year;
@@ -166,17 +170,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         if (albums.length >= 5) {
-            console.log('5 or more covers');
             showCovers([wayLeftCover, leftCover, centerCover, rightCover, wayRightCover]);
 
-            console.log('covers should be showing');
             const current = albums[currentIndex];
-            console.log('test');
-            console.log('current album', albums[currentIndex]);
             albumTitle.textContent = current.album;
-            console.log('test1');
             artistName.textContent = current.artist;
-            console.log('test2');
             year.textContent = current.year;
             
             await updateFiveCoverImages();
@@ -332,7 +330,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     /* SEARCH */
 
-
     searchIcon.addEventListener('click', (event) => {
         searchBar.classList.remove('hidden');
         searchIcon.classList.add('hidden');
@@ -342,6 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     searchInput.addEventListener('keydown', (event) => {
         if (event.key === "Enter") {
+            isSearch = true;
             const input = searchInput.value.trim();
             searchInput.blur();
             handleSearch(input);
@@ -349,6 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     cancelIcon.addEventListener('click', async () => {
+        isSearch = false;
 
         searchInput.value = '';
         cancelIcon.classList.add('hidden');
@@ -376,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function handleSearch(input) {
 
-        // get query tokens
+        // tokenize the input query
         const results = tokenizeInput(input);
 
         // start with full collection
@@ -560,22 +559,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const collectionStats = getCollectionStats();
 
-        if (albums.length === 1) { // grammar
-            collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> album in your collection`;
-            numArtists.innerHTML = `There is <b>${collectionStats.numArtists}</b> different artist in your collection`;
-            topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> album`;
+        collectionSize.innerHTML = `This collection contains <b>${collectionStats.size}</b> album(s)`;
+        numArtists.innerHTML = `This collection features <b>${collectionStats.numArtists}</b> different artist(s)`;
+        topArtist.innerHTML = `The largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> album(s)`;
+        if (collectionStats.minYear !== Infinity && collectionStats.maxYear !== 0 && collectionStats.minYear !== collectionStats.maxYear) {
+            chartIntro.innerHTML = `This collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
+            createAlbumChart(collectionStats.albumsByYear);
         } else {
-            collectionSize.innerHTML = `You have <b>${collectionStats.size}</b> albums in your collection`;
-            numArtists.innerHTML = `There are <b>${collectionStats.numArtists}</b> different artists in your collection`;
-            topArtist.innerHTML = `Your largest discography is by <b>${collectionStats.topArtist}</b> with <b>${collectionStats.topArtistCount}</b> albums`;
-            if (collectionStats.minYear !== Infinity && collectionStats.maxYear !== 0) {
-                chartIntro.innerHTML = `Your collection spans from <b>${collectionStats.minYear}</b> to <b>${collectionStats.maxYear}</b>`
-                createAlbumChart(collectionStats.albumsByYear);
-            } else {
-                chartIntro.innerHTML = ''
-            }
-        }
-
+            chartIntro.innerHTML = ''
+        }    
+        
         infoOverlay.classList.add('show');
     }
 
@@ -795,6 +788,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     shuffleButton.addEventListener('click', async () => {
         if (albums.length === 0 || !allowShuffle) return;
+        if (albums.length === 1 && allowShuffle) {
+            await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], coverColors);
+            return;
+        }
         
         // prevent shuffle and cover focus
         allowShuffle = false;
@@ -839,7 +836,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         try {
-            console.log('current album', albums[currentIndex]);
             await window.electronAPI.openAlbumFocusWindow(albums[currentIndex], coverColors);
         } catch (error) {
             console.error('Error opening album focus window:', error);
@@ -895,18 +891,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.electronAPI.onAlbumAdded(async (albumData) => {
 
         wasCollectionUpdated = true;
-        console.log('albumData', albumData);
 
-        // store the current album before refreshing the collection
+        // refresh collection
         albums = await window.electronAPI.getAlbumsFromCollection();
 
         if (!albumData) {
             // album was deleted
-            console.log('album was deleted');
             currentIndex = (currentIndex > 0 && currentIndex < albums.length) ? currentIndex : 0;
         } else {
             // try to find the updated album
-            console.log('album was not deleted');
             let newIndex = findAlbumIndex(albumData);
             if (newIndex > -1 && newIndex < albums.length) {
                 currentIndex = newIndex;
