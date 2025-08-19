@@ -1,6 +1,6 @@
 {
   "name": "what-to-spin",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "main": "src/main.js",
   "homepage": ".",
   "author": "Ethan Burmane <ethanburmane@gmail.com>",
@@ -122,8 +122,7 @@
       "deleteAppDataOnUninstall": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "What to Spin",
-      "include": "build/installer.nsh"
+      "shortcutName": "What to Spin"
     },
     "linux": {
       "target": [
@@ -135,12 +134,6 @@
         },
         {
           "target": "deb",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "rpm",
           "arch": [
             "x64"
           ]

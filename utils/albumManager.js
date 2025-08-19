@@ -10,6 +10,9 @@ let savedSortingOptions = {
     order: 'ascending'
 }
 
+// max retries for fetching album cover
+maxRetries = 3;
+
 /* ALBUMS HANDLING */
 
 async function writeAlbumsToCollection(albums) {
@@ -112,27 +115,36 @@ async function getAlbumCover(album, artist) {
         return null;
     }
 
-    try {
-        const coverUrl = await albumArt(artist, { album: album, size: 'large' });
-        if (!coverUrl) {
-            console.log("coverUrl is null");
-            return null;
+    // retry if albumArt throws an error (up to 3 tries)
+    for (let attempt = 1; attempt < maxRetries; attempt++) {
+        try {
+            const coverUrl = await albumArt(artist, { album: album, size: 'large' });
+            if (!coverUrl) {
+                console.log("coverUrl is null");
+                return null;
+            }
+
+            // checking cover;
+            const response = await fetch(coverUrl);
+            if (!response.ok) {
+                return null;
+            }
+
+            // saving cover
+            const cover = { '#text': coverUrl };
+            const coverPath = await saveAlbumCover(album, artist, cover);
+
+            return coverPath;
+        } catch (error) {
+            console.error(`Error fetching album cover for "${album}" by "${artist}":`, error);
+            if (attempt === maxRetries) {
+                return null;
+            }
+
+            // increase wait time for failed fetch
+            const delay = 1000 * Math.pow(2, attempt - 1);
+            await new Promise(resolve => setTimeout(resolve, delay))
         }
-
-        // checking cover;
-        const response = await fetch(coverUrl);
-        if (!response.ok) {
-            return null;
-        }
-
-        // saving cover
-        const cover = { '#text': coverUrl };
-        const coverPath = await saveAlbumCover(album, artist, cover);
-
-        return coverPath;
-    } catch (error) {
-        console.error(`Error fetching album cover for "${album}" by "${artist}":`, error);
-        return null;
     }
 }
 
