@@ -2,7 +2,7 @@
   <img src="https://github.com/user-attachments/assets/a66ade39-0e4e-4cb0-8243-ced8bcfc4172" height="120px">
   <img src="https://github.com/user-attachments/assets/e859afee-993e-4068-a676-0b040e26f4ad" height="120px">
   <h2>Catalog your record collection and find what to spin</h2>
-  <img src="https://github.com/user-attachments/assets/e66f05a5-cd1e-467e-9a3f-3970ffa06833">
+  <img src="https://github.com/user-attachments/assets/57591845-b508-42e4-9228-479bea15ab40">
 </div>
 
 <p align="center">
