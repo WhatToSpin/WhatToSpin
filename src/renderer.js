@@ -631,7 +631,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const decadeData = {};
         Object.entries(albumsByYear).forEach(([year, count]) => {
-            if (year >= 190) { // the first modern vinyl record was released in 1948, so this is generous
+            if (year >= 1900) { // you dont have a record from before this...
                 const decade = Math.floor(Number(year) / 10) * 10;
                 decadeData[decade] = (decadeData[decade] || 0) + count;
             }

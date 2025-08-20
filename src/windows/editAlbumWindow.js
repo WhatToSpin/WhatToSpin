@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     coverInput.addEventListener('change', async function(e) {
         const file = e.target.files[0];
-        if (file && file.type === 'image/png') {
+        if (file && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg')) {
             if (file.size > MAX_FILE_SIZE) {
                 alert(`File size too large. Maximum size is ${MAX_FILE_SIZE}`);
                 return;
