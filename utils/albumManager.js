@@ -353,5 +353,6 @@ module.exports = {
     deleteAlbumFromCollection,
     updateAlbumInCollection,
     loadOptionsFile,
+    sortCollection,
     updateSortingOptions
 };

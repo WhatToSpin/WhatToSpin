@@ -895,16 +895,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         // refresh collection
         albums = await window.electronAPI.getAlbumsFromCollection();
 
+        // close search bar
+        if (isSearch) {
+            searchInput.value = '';
+            cancelIcon.classList.add('hidden');
+            searchIcon.classList.remove('hidden');
+            searchBar.classList.add('hidden');
+            isSearch = false;
+        }
+
         if (!albumData) {
             // album was deleted
-            if (isSearch) {
-                searchInput.value = '';
-                cancelIcon.classList.add('hidden');
-                searchIcon.classList.remove('hidden');
-                searchBar.classList.add('hidden');
-                isSearch = false;
-            }
-
             currentIndex = (currentIndex > 0 && currentIndex < albums.length) ? currentIndex : 0;
         } else {
             // try to find the updated album
@@ -923,7 +924,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function updateSorting() {
         const currentAlbum = albums[currentIndex];
-        albums = await window.electronAPI.updateSortingOptions(sortingOptions, albums);
+
+        // if there is a search, make sure to sort the full collection
+        if (isSearch) {
+            let fullCollection = await window.electronAPI.getAlbumsFromCollection();
+            fullCollection = await window.electronAPI.updateSortingOptions(sortingOptions, fullCollection);
+            // sort the sub-list of albums 
+            albums = await window.electronAPI.sortCollection(albums);
+        } else {
+            albums = await window.electronAPI.updateSortingOptions(sortingOptions, albums);
+        }
 
         let index;
         if (currentAlbum) index = findAlbumIndex(currentAlbum);

@@ -5,6 +5,7 @@ const {
     deleteAlbumFromCollection, 
     updateAlbumInCollection,
     loadOptionsFile,
+    sortCollection,
     updateSortingOptions
 } = require('../utils/albumManager');
 const { BrowserWindow } = require('electron');
@@ -84,6 +85,16 @@ function registerIpcHandlers() {
         } catch (error) {
             console.error(`Error loading options file: ${error}`)
             return {};
+        }
+    });
+
+    ipcMain.handle('sort-collection', async (event, albums) => {
+        try {
+            const sortedAlbums = await sortCollection(albums)
+            return sortedAlbums;
+        } catch (error) {
+            console.error(`Error sorting albums: ${error}`);
+            return albums;
         }
     });
 
