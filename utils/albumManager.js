@@ -59,7 +59,7 @@ async function addAlbumToCollection(albumData) {
 
         // make sure album does not already exist
         if (albums.length !== 0) {
-            const existingAlbum = albums.find(
+            const existingAlbum = albums?.find(
                 (a) => a.album.toLowerCase() === album.toLowerCase() &&
                 a.artist.toLowerCase() === artist.toLowerCase()
             );
