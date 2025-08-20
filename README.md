@@ -1,4 +1,18 @@
-# <img src="build/icon.png" height=20px style="margin-right:10px"></img> What to Spin
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/a66ade39-0e4e-4cb0-8243-ced8bcfc4172" height="100px">
+  <img src="https://github.com/user-attachments/assets/611e55af-b455-4caa-95a6-4ccb90f0e622" height="150px">
+</div>
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/c744f1ae-e738-4162-9e67-b862218e6267" height="75px">
+  <img src="https://github.com/user-attachments/assets/7050f3b3-c9e4-4ea1-a82c-f2c3a0f4fd2c" height="75px">
+</div>
+
+
+# About
+**What To Spin** is a desktop application widget for building a digital catalog of your vinyl collection
+
+Search for specific records, view stats about your collection, and press shuffle to see what to spin
 
 ## Download
 To download the app, go to [Releases](https://github.com/ethanburmane/what-to-spin/releases) and download the correct release for your OS:
