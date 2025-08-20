@@ -1,7 +1,11 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/a66ade39-0e4e-4cb0-8243-ced8bcfc4172" height="100px">
-  <img src="https://github.com/user-attachments/assets/611e55af-b455-4caa-95a6-4ccb90f0e622" height="150px">
+  <img src="https://github.com/user-attachments/assets/a66ade39-0e4e-4cb0-8243-ced8bcfc4172" height="120px">
+  <img src="https://github.com/user-attachments/assets/e859afee-993e-4068-a676-0b040e26f4ad" height="120px">
+  <h2>Catalog your record collection and find what to spin</h2>
+  <img src="https://github.com/user-attachments/assets/3b1665bc-cb2c-45a2-82a1-5aa8d0a4555e">
 </div>
+
+
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c744f1ae-e738-4162-9e67-b862218e6267" height="75px">
