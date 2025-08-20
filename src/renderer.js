@@ -897,6 +897,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!albumData) {
             // album was deleted
+            if (isSearch) {
+                searchInput.value = '';
+                cancelIcon.classList.add('hidden');
+                searchIcon.classList.remove('hidden');
+                searchBar.classList.add('hidden');
+                isSearch = false;
+            }
+
             currentIndex = (currentIndex > 0 && currentIndex < albums.length) ? currentIndex : 0;
         } else {
             // try to find the updated album
