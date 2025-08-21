@@ -281,7 +281,7 @@ async function loadOptionsFile() {
         savedSortingOptions = JSON.parse(savedSortingOptions);
     } catch (error) {
         await fsPromises.mkdir(path.dirname(path.join(filepath.userData, 'options.json')), { recursive: true });
-        await writeAlbumsToCollection(savedSortingOptions);
+        await saveOptions(savedSortingOptions);
     }
     return savedSortingOptions;
 }

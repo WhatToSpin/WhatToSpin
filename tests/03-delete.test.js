@@ -1,30 +1,30 @@
 const { test, expect } = require('@playwright/test');
 const { _electron: electron } = require('playwright');
 const { execSync } = require('child_process');
-const os = require('os');
+const fs = require('fs');
 const path = require('path');
+const osTmpdir = require('os').tmpdir;
 
 test.describe('Delete Album Tests', () => {
     let electronApp;
     let mainWindow;
+    let tempUserDataDir;
 
     test.beforeAll(async () => {
-        // launch app
-        electronApp = await electron.launch({ 
-            args: ['./src/main.js'] 
+        // create a temp directory
+        tempUserDataDir = fs.mkdtempSync(path.join(osTmpdir(), 'test-dir-'));
+        fs.mkdirSync(tempUserDataDir, { recursive: true });
+
+        electronApp = await electron.launch({
+            cwd: path.resolve(__dirname, '..'),
+            args: [
+                '.',
+                `--user-data-dir=${tempUserDataDir}`
+            ]
         });
         mainWindow = await electronApp.firstWindow();
-
-        // check for album covers
-        await expect(mainWindow.locator('#wayLeftCover')).toBeVisible();
-        await expect(mainWindow.locator('#leftCover')).toBeVisible();
-        await expect(mainWindow.locator('#centerCover')).toBeVisible();
-        await expect(mainWindow.locator('#rightCover')).toBeVisible();
-        await expect(mainWindow.locator('#wayRightCover')).toBeVisible();
-
-        // check for album info
-        await expect(mainWindow.locator('#albumTitle')).toContainText(/.+/gm)
-        await expect(mainWindow.locator('#artistName')).toContainText(/.+/gm)
+        await mainWindow.waitForLoadState('domcontentloaded');
+        await mainWindow.waitForTimeout(1000);
     });
 
     test.afterAll(async () => {
@@ -32,16 +32,29 @@ test.describe('Delete Album Tests', () => {
         await mainWindow.close();
         await electronApp.close();
 
-        // clean up files
-        const electronDataPath = path.join(os.homedir(), 'Library', 'Application Support', 'Electron');
-        console.log(electronDataPath);
-        try {
-            execSync(`rm -f "${electronDataPath}/collection.json"`);
-            execSync(`rm -rf "${electronDataPath}/covers/"`);
-        } catch (error) {
-            console.log(error);
+        // clean up temp directory
+        if (tempUserDataDir && fs.existsSync(tempUserDataDir)) {
+            execSync(`rm -rf "${tempUserDataDir}"`);
         }
     });
+
+    async function addAlbumToCollection(albumData) {
+        // open add album window
+        const windowPromise = electronApp.waitForEvent('window');
+        await expect(mainWindow.locator('#addAlbumButton')).toBeVisible();
+        await mainWindow.locator('#addAlbumButton').click();
+        const addWindow = await windowPromise;
+        await addWindow.waitForLoadState('domcontentloaded');
+
+        // fill in album details
+        await addWindow.locator('#album-name').fill(albumData.album);
+        await addWindow.locator('#artist-name').fill(albumData.artist);
+        await addWindow.locator('#year-released').fill(albumData.year);
+
+        // click add album button
+        await addWindow.locator('#submit-button').click();
+        await addWindow.waitForEvent('close');
+    }
 
     async function openFocusWindow() {
         const windowPromise = electronApp.waitForEvent('window');
@@ -84,27 +97,19 @@ test.describe('Delete Album Tests', () => {
         }
     }
 
+    test('Setup album to delete', async () => {
+        const albumData = { album: "Let It Be", artist: "The Beatles", year: "1970" };
+        await addAlbumToCollection(albumData);
+    });
+
     test('Delete albums', async () => {
-        // delete album (should leave four albums)
-        await deleteAlbum();
-
-        // check cover visibilty
-        await isCoverVisible(false, true, true, true, false);
-
-        // delete album (should leave three albums)
-        await deleteAlbum();
-        await isCoverVisible(false, true, true, true, false);
-
-        // delete album (should leave two albums)
-        await deleteAlbum();
-        await isCoverVisible(false, false, true, true, false);
-
-        // delete album (should leave one albums)
-        await deleteAlbum();
+        // check initial cover visibility
         await isCoverVisible(false, false, true, false, false);
 
-        // delete album (should leave none)
+        // delete album
         await deleteAlbum();
+
+        // check updated cover visibility
         await isCoverVisible(false, false, false, false, false);
         await expect(mainWindow.locator('#albumTitle')).toContainText('No albums found');
         await expect(mainWindow.locator('#artistName')).toContainText('');

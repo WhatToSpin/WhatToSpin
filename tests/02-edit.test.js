@@ -1,28 +1,29 @@
 const { test, expect } = require('@playwright/test');
 const { _electron: electron } = require('playwright');
+const fs = require('fs');
 const path = require('path');
+const osTmpdir = require('os').tmpdir;
 
 test.describe('Edit Album Tests', () => {
     let electronApp;
     let mainWindow;
+    let tempUserDataDir;
 
     test.beforeAll(async () => {
-        // launch app
-        electronApp = await electron.launch({ 
-            args: ['./src/main.js'] 
+        // create a temp directory
+        tempUserDataDir = fs.mkdtempSync(path.join(osTmpdir(), 'test-dir-'));
+        fs.mkdirSync(tempUserDataDir, { recursive: true });
+
+        electronApp = await electron.launch({
+            cwd: path.resolve(__dirname, '..'),
+            args: [
+                '.',
+                `--user-data-dir=${tempUserDataDir}`
+            ]
         });
         mainWindow = await electronApp.firstWindow();
-
-        // check for album covers
-        await expect(mainWindow.locator('#wayLeftCover')).toBeVisible();
-        await expect(mainWindow.locator('#leftCover')).toBeVisible();
-        await expect(mainWindow.locator('#centerCover')).toBeVisible();
-        await expect(mainWindow.locator('#rightCover')).toBeVisible();
-        await expect(mainWindow.locator('#wayRightCover')).toBeVisible();
-
-        // check for album info
-        await expect(mainWindow.locator('#albumTitle')).toContainText(/.+/gm)
-        await expect(mainWindow.locator('#artistName')).toContainText(/.+/gm)
+        await mainWindow.waitForLoadState('domcontentloaded');
+        await mainWindow.waitForTimeout(1000);
     });
 
     test.afterAll(async () => {
@@ -31,6 +32,24 @@ test.describe('Edit Album Tests', () => {
         await electronApp.close();
     });
 
+    async function addAlbumToCollection(albumData) {
+        // open add album window
+        const windowPromise = electronApp.waitForEvent('window');
+        await expect(mainWindow.locator('#addAlbumButton')).toBeVisible();
+        await mainWindow.locator('#addAlbumButton').click();
+        const addWindow = await windowPromise;
+        await addWindow.waitForLoadState('domcontentloaded');
+
+        // fill in album details
+        await addWindow.locator('#album-name').fill(albumData.album);
+        await addWindow.locator('#artist-name').fill(albumData.artist);
+        await addWindow.locator('#year-released').fill(albumData.year);
+
+        // click add album button
+        await addWindow.locator('#submit-button').click();
+        await addWindow.waitForEvent('close');
+    }
+    
     async function openFocusWindow() {
         const windowPromise = electronApp.waitForEvent('window');
         await mainWindow.locator('#centerCover').click();
@@ -47,6 +66,11 @@ test.describe('Edit Album Tests', () => {
         await editWindow.waitForLoadState('domcontentloaded');
         return editWindow;
     }
+
+    test('Setup album to edit', async () => {
+        const albumData = { album: "Let It Be", artist: "The Beatles", year: "1970" };
+        await addAlbumToCollection(albumData);
+    });
 
     test('Open dropdown menu', async () => {
         // open album focus 

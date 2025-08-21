@@ -1,29 +1,30 @@
 const { test, expect } = require('@playwright/test');
 const { _electron: electron } = require('playwright');
-const { execSync } = require('child_process');
-const os = require('os');
+const fs = require('fs');
 const path = require('path');
+const osTmpdir = require('os').tmpdir;
+
 
 test.describe('Add Album Tests', () => {
     let electronApp;
     let mainWindow;
+    let tempUserDataDir;
 
     test.beforeAll(async () => {
+        // create a temp directory
+        tempUserDataDir = fs.mkdtempSync(path.join(osTmpdir(), 'test-dir-'));
+        fs.mkdirSync(tempUserDataDir, { recursive: true });
 
-        // clear albums first
-        const electronDataPath = path.join(os.homedir(), 'Library', 'Application Support', 'Electron');
-        try {
-            execSync(`rm -f "${electronDataPath}/collection.json"`);
-            execSync(`rm -rf "${electronDataPath}/covers/"`);
-        } catch (error) {
-            // ignore
-        }
-
-        // launch app
-        electronApp = await electron.launch({ 
-            args: ['./src/main.js'] 
+        electronApp = await electron.launch({
+            cwd: path.resolve(__dirname, '..'),
+            args: [
+                '.',
+                `--user-data-dir=${tempUserDataDir}`
+            ]
         });
         mainWindow = await electronApp.firstWindow();
+        await mainWindow.waitForLoadState('domcontentloaded');
+        await mainWindow.waitForTimeout(1000);
     });
 
     test.afterAll(async () => {

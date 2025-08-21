@@ -22,7 +22,10 @@ const filepath = {
     ? path.join(__dirname, '../src/assets/unknown.png')
     : path.join(app.getAppPath(), 'src/assets/unknown.png'),
   
-  userData: app.getPath('userData'),
+  get userData() { 
+    return app.getPath('userData'); 
+  },
+  
   get userCovers() { 
     return ensureDir(path.join(app.getPath('userData'), 'covers')); 
   },
