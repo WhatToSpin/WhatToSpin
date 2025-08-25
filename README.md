@@ -33,7 +33,7 @@
 
 To source the album covers, I use the package [album-art](https://github.com/lacymorrow/album-art) which uses the Spotify API to fetch each cover
 
-Unfortuatly, Spotify tends to favor newer covers (e.g., deluxe editions, anniversary editions, etc.) and struggles to return the correct cover for albums in a series (e.g., "Led Zeppelin" will return "Led Zeppelin IV" and "SATURATION" will return "SATURATION III")
+Unfortunately, Spotify tends to favor newer covers (e.g., deluxe editions, anniversary editions, etc.) and struggle to return the correct cover for albums in a series (e.g., "Led Zeppelin" will return "Led Zeppelin IV" and "SATURATION" will return "SATURATION III")
 
 I will work on improving the accuracy of the covers, but for now if a cover is incorrect you can change it manually by editing the album's information
 
