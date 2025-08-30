@@ -18,6 +18,8 @@ async function createWindow() {
         }
     });
 
+    mainWindow.setAspectRatio(600/380);
+
     mainWindow.loadFile(path.join(__dirname, 'index.html'));
     mainWindow.show();
 }

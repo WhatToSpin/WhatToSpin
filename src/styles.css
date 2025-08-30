@@ -361,7 +361,6 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     filter: brightness(1) drop-shadow(0 1.8vh 0.9vh rgba(0, 0, 0, 0.3));
 }
 
-
 .cover.center.hidden,
 .cover.left.hidden,
 .cover.right.hidden,
@@ -375,15 +374,15 @@ button, .cover, .shuffle-icon, .add-icon, .info-icon, .search-bar, .search-bar i
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 15px;
+    margin-top: 2.5vh;
     margin-bottom: 0px;
-    min-height: 80px;
+    min-height: 13vh;
 }
 
 .album-info {
     text-align: center;
     flex: 1;
-    max-width: 400px;
+    max-width: 67vw;
     overflow: hidden;
 }
 
