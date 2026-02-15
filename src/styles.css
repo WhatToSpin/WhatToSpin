@@ -579,3 +579,32 @@ p {
 .slide-indicator.active {
     background-color: #666;
 }
+
+/* ALPHABET DISPLAY */
+
+.alphabet-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    max-width: 400px;
+}
+
+.alphabet-letter {
+    font-size: 20px;
+    font-weight: 600;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alphabet-letter.used {
+    color: #000000;
+}
+
+.alphabet-letter.unused {
+    color: #d3d3d3;
+}
