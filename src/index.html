@@ -38,12 +38,35 @@
     <div id="infoOverlay" class="info-overlay">
         <div id="infoPage" class="info-page">
             <div class="close">Press 'Escape' to close</div>
-            <h1 id="collectionSize"></h1>
-            <h1 id="numArtists"></h1>
-            <h1 id="topArtist"></h1>
-            <h1 id="chartIntro"></h1>
-            <div class="chart-container">
-                <canvas id="albumChart"></canvas>
+            
+            <!-- Slide 1: Collection Stats -->
+            <div id="slide1" class="info-slide active">
+                <h1 id="collectionSize"></h1>
+                <h1 id="numArtists"></h1>
+            </div>
+            
+            <!-- Slide 2: Year Span and Chart -->
+            <div id="slide2" class="info-slide">
+                <h1 id="chartIntro"></h1>
+                <div class="chart-container">
+                    <canvas id="albumChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Slide 3: Top Artist -->
+            <div id="slide3" class="info-slide">
+                <h1 id="topArtist"></h1>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="slide-navigation">
+                <button id="prevSlide" class="slide-nav-btn">&#9664;</button>
+                <div class="slide-indicators">
+                    <span id="indicator1" class="slide-indicator active" data-slide="1"></span>
+                    <span id="indicator2" class="slide-indicator" data-slide="2"></span>
+                    <span id="indicator3" class="slide-indicator" data-slide="3"></span>
+                </div>
+                <button id="nextSlide" class="slide-nav-btn">&#9654;</button>
             </div>
         </div>
     </div>

@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const numArtists = document.getElementById('numArtists');
     const topArtist = document.getElementById('topArtist');
     const chartIntro = document.getElementById('chartIntro');
+    const slide1 = document.getElementById('slide1');
+    const slide2 = document.getElementById('slide2');
+    const slide3 = document.getElementById('slide3');
+    const prevSlideBtn = document.getElementById('prevSlide');
+    const nextSlideBtn = document.getElementById('nextSlide');
+    const slideIndicators = document.querySelectorAll('.slide-indicator');
 
     // sorting elements
     const sortIcon = document.getElementById('sortIcon');
@@ -56,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let allowShuffle = true;
     let allowCoverFocus = true;
     let isSearch = false;
+    let currentSlide = 1;
 
     // default sorting options
     let sortingOptions = {
@@ -538,6 +545,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         infoDisplayed = true;
+        currentSlide = 1;
         showAlbumInfo();
     });
 
@@ -548,6 +556,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             infoOverlay.classList.remove('show');
             infoDisplayed = false;
         }
+        
+        // slide navigation with arrow keys
+        if (infoDisplayed && event.key === 'ArrowLeft') {
+            event.preventDefault();
+            currentSlide = currentSlide === 1 ? 3 : currentSlide - 1;
+            updateSlideDisplay();
+        }
+        
+        if (infoDisplayed && event.key === 'ArrowRight') {
+            event.preventDefault();
+            currentSlide = currentSlide === 3 ? 1 : currentSlide + 1;
+            updateSlideDisplay();
+        }
+    });
+
+    prevSlideBtn.addEventListener('click', () => {
+        currentSlide = currentSlide === 1 ? 3 : currentSlide - 1;
+        updateSlideDisplay();
+    });
+
+    nextSlideBtn.addEventListener('click', () => {
+        currentSlide = currentSlide === 3 ? 1 : currentSlide + 1;
+        updateSlideDisplay();
+    });
+
+    slideIndicators.forEach(indicator => {
+        indicator.addEventListener('click', () => {
+            currentSlide = parseInt(indicator.getAttribute('data-slide'));
+            updateSlideDisplay();
+        });
     });
 
     function showAlbumInfo() {
@@ -569,7 +607,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             chartIntro.innerHTML = ''
         }    
         
+        updateSlideDisplay();
         infoOverlay.classList.add('show');
+    }
+
+    function updateSlideDisplay() {
+        // hide all slides
+        slide1.classList.remove('active');
+        slide2.classList.remove('active');
+        slide3.classList.remove('active');
+
+        // update all indicators
+        slideIndicators.forEach(indicator => {
+            indicator.classList.remove('active');
+        });
+
+        // show current slide
+        if (currentSlide === 1) {
+            slide1.classList.add('active');
+            slideIndicators[0].classList.add('active');
+        } else if (currentSlide === 2) {
+            slide2.classList.add('active');
+            slideIndicators[1].classList.add('active');
+        } else if (currentSlide === 3) {
+            slide3.classList.add('active');
+            slideIndicators[2].classList.add('active');
+        }
     }
 
     function getCollectionStats() {
