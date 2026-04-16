@@ -15,28 +15,120 @@ maxRetries = 3;
 
 /* ALBUMS HANDLING */
 
+/**
+ * Atomically writes albums to collection.json with backup
+ * Uses write-then-rename pattern to ensure file is never in inconsistent state
+ */
 async function writeAlbumsToCollection(albums) {
-    try { 
-        await fsPromises.writeFile(
-            path.join(filepath.userData, 'collection.json'),
-            JSON.stringify(albums, null, 2)
-        );
+    try {
+        // Validate input - never write empty array if we shouldn't
+        if (!Array.isArray(albums)) {
+            throw new Error('Albums must be an array');
+        }
+
+        const collectionPath = path.join(filepath.userData, 'collection.json');
+        const tempPath = path.join(filepath.userData, 'collection.json.tmp');
+        const backupPath = path.join(filepath.userData, 'collection.json.backup');
+
+        // Write to temporary file 
+        const jsonData = JSON.stringify(albums, null, 2);
+        await fsPromises.writeFile(tempPath, jsonData);
+
+        // Create backup of existing file (if it exists)
+        try {
+            if (fs.existsSync(collectionPath)) {
+                await fsPromises.copyFile(collectionPath, backupPath);
+            }
+        } catch (backupError) {
+            console.warn(`Warning: Could not create backup: ${backupError}`);
+        }
+
+        // Atomically rename temp file to actual file
+        await fsPromises.rename(tempPath, collectionPath);
+        console.log('Successfully saved collection to collection.json');
     } catch (error) {
-        console.log(`Error saving albums to collection.json: ${error}`);
+        console.error(`Error saving albums to collection.json: ${error}`);
+        // Clean up temp file if it exists
+        try {
+            const tempPath = path.join(filepath.userData, 'collection.json.tmp');
+            if (fs.existsSync(tempPath)) {
+                fs.unlinkSync(tempPath);
+            }
+        } catch (cleanupError) {
+            console.error(`Error cleaning up temp file: ${cleanupError}`);
+        }
+        throw error; // Re-throw so caller knows write failed
     }
 }
 
+/**
+ * Reads albums from collection.json with recovery mechanisms
+ * If file is corrupted, attempts to recover from backup
+ * Only creates empty collection if file genuinely doesn't exist
+ */
 async function getAlbumsFromCollection() {
     let albums;
+    const collectionPath = path.join(filepath.userData, 'collection.json');
+    const backupPath = path.join(filepath.userData, 'collection.json.backup');
+
     try {
-        albums = await fsPromises.readFile(path.join(filepath.userData, 'collection.json'), 'utf-8');
-        albums = JSON.parse(albums);
-    } catch (error) {
-        albums = [];
-        await fsPromises.mkdir(path.dirname(path.join(filepath.userData, 'collection.json')), { recursive: true });
-        await writeAlbumsToCollection(albums);
+        // Ensure directory exists
+        await fsPromises.mkdir(path.dirname(collectionPath), { recursive: true });
+
+        // Try to read main collection file
+        const fileContent = await fsPromises.readFile(collectionPath, 'utf-8');
+        albums = JSON.parse(fileContent);
+        
+        // Validate that we got an array
+        if (!Array.isArray(albums)) {
+            throw new Error('Collection file is not an array');
+        }
+        return albums;
+    } catch (readError) {
+        // File doesn't exist - this is normal for first run
+        if (readError.code === 'ENOENT') {
+            console.log('Collection file does not exist, creating new empty collection');
+            albums = [];
+            try {
+                await writeAlbumsToCollection(albums);
+            } catch (writeError) {
+                console.error('Failed to create initial collection file:', writeError);
+                // Return empty array even if write fails, don't crash
+                return [];
+            }
+            return albums;
+        }
+        
+        // File exists but is corrupted/invalid - try to recover from backup
+        console.error('Error reading/parsing collection.json:', readError);
+        console.log('Attempting to recover from backup...');
+        
+        try {
+            const backupContent = await fsPromises.readFile(backupPath, 'utf-8');
+            albums = JSON.parse(backupContent);
+            
+            if (!Array.isArray(albums)) {
+                throw new Error('Backup file is not an array');
+            }
+            
+            console.log(`Recovered ${albums.length} albums from backup file`);
+            
+            // Restore from backup
+            try {
+                await writeAlbumsToCollection(albums);
+                console.log('Successfully restored collection from backup');
+            } catch (restoreError) {
+                console.error('Failed to restore from backup:', restoreError);
+            }
+            
+            return albums;
+        } catch (backupError) {
+            // No backup available or backup is also corrupted
+            console.error('No valid backup available, returning empty collection:', backupError);
+            console.warn('⚠️ DATA LOSS WARNING: Collection file was corrupted and cannot be recovered');
+            return [];
+        }
     }
-    return albums;
 }
 
 
@@ -311,16 +403,29 @@ async function updateSortingOptions(sortingOptions, albums) {
     return sortedAlbums;
 }
 
+function cleanName(name) {
+
+    name = String(name || '');
+
+    // Remove leading 'the' or 'a'
+    name = name.startsWith('The ') || name.startsWith('the ') ? name.slice(4) : name;
+    name = name.startsWith('A ') || name.startsWith('a ') ? name.slice(2) : name;
+
+    // Replace common special characters for sorting
+    name = name.replace('$', 'S');
+
+    return name;
+}
+
 async function sortCollection(albums) {
 
     if (savedSortingOptions.method === 'year') {
 
         // sort by year
         albums.sort((a, b) => {
-            // remove "the" for sorting 
-            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
-            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
-            return a.year - b.year || artistA.localeCompare(artistB);
+            const artistA = cleanName(a.artist);
+            const artistB = cleanName(b.artist);
+            return artistA.localeCompare(artistB) || a.year - b.year;
         });
     
     } else if (savedSortingOptions.method === 'dateAdded') {
@@ -333,9 +438,8 @@ async function sortCollection(albums) {
 
         // sort by artist
         albums.sort((a, b) => {
-            // remove "the" for sorting 
-            const artistA = a.artist.startsWith('The ') || a.artist.startsWith('the ') ? a.artist.slice(4) : a.artist;
-            const artistB = b.artist.startsWith('The ') || b.artist.startsWith('the ') ? b.artist.slice(4) : b.artist;
+            const artistA = cleanName(a.artist);
+            const artistB = cleanName(b.artist);
             return artistA.localeCompare(artistB) || a.year - b.year;
         });
     }
