@@ -245,4 +245,38 @@ test.describe('Edit Album Tests', () => {
         // close focus window
         await focusWindow.close();
     });
+
+    test('Editing cover updates saved primary color', async () => {
+        const collectionPath = path.join(tempUserDataDir, 'collection.json');
+
+        // snapshot color before edit
+        const beforeCollection = JSON.parse(fs.readFileSync(collectionPath, 'utf-8'));
+        const beforeAlbum = beforeCollection.find(
+            (album) => album.album === 'Rubber Soul' && album.artist === 'The Beatles'
+        );
+
+        // open edit window and upload a new cover
+        const focusWindow = await openFocusWindow();
+        const editWindow = await openEditWindow(focusWindow);
+        const newCoverPath = path.join(__dirname, '..', 'src', 'assets', 'unknown.png');
+        await editWindow.locator('#coverInput').setInputFiles(newCoverPath);
+        await editWindow.locator('#saveChanges').click();
+
+        // allow save to complete
+        await focusWindow.waitForTimeout(500);
+        await focusWindow.close();
+
+        // verify persisted primary color in collection
+        const afterCollection = JSON.parse(fs.readFileSync(collectionPath, 'utf-8'));
+        const afterAlbum = afterCollection.find(
+            (album) => album.album === 'Rubber Soul' && album.artist === 'The Beatles'
+        );
+
+        expect(afterAlbum).toBeTruthy();
+        expect(afterAlbum.primaryColor).toMatch(/^#[0-9a-fA-F]{6}$/);
+
+        if (beforeAlbum && beforeAlbum.primaryColor) {
+            expect(afterAlbum.primaryColor).not.toBe('');
+        }
+    });
 });

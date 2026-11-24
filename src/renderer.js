@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sortByArtist = document.getElementById('sortByArtist');
     const sortByYear = document.getElementById('sortByYear');
     const sortByDateAdded = document.getElementById('sortByDateAdded');
+    const sortByColor = document.getElementById('sortByColor');
     const ascending = document.getElementById('ascending');
     const descending = document.getElementById('descending');
 
@@ -143,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             year.textContent = current.year;
             
             setCoverImage(centerCover, current); // only set center cover
-            await setCoverColor(current.coverPath);
+            setCoverColor(current);
 
             return;
         }
@@ -159,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             setCoverImage(centerCover, current);
             setCoverImage(rightCover, albums[(currentIndex + 1) % 2]);
-            await setCoverColor(current.coverPath);
+            setCoverColor(current);
 
             return;
         }
@@ -214,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(centerCover, albums[currentIndex]);
         setCoverImage(rightCover, albums[rightIndex]);
 
-        await setCoverColor(albums[currentIndex].coverPath);
+        setCoverColor(albums[currentIndex]);
     }
 
     async function updateFiveCoverImages() {
@@ -231,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setCoverImage(rightCover, albums[rightIndex]);
         setCoverImage(wayRightCover, albums[wayRightIndex]);
 
-        await setCoverColor(albums[currentIndex].coverPath);
+        setCoverColor(albums[currentIndex]);
     }
 
     function setCoverImage(imgElement, album) {
@@ -257,84 +258,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }   
 
-    async function setCoverColor(albumCoverPath) {
-        if (!albumCoverPath) {
-            return;
-        }
+    function isValidHexColor(value) {
+        return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value.trim());
+    }
 
-        const img = new Image();
-        img.src = `file://${albumCoverPath}?t=${Date.now()}`;
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+    function setCoverColor(album) {
+        const dominantColor = isValidHexColor(album?.primaryColor) ? album.primaryColor : '#cfcfcf';
 
-        img.onload = async () => {
-            try {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
+        const color = dominantColor.replace('#', '');
+        const r = parseInt(color.slice(0, 2), 16);
+        const g = parseInt(color.slice(2, 4), 16);
+        const b = parseInt(color.slice(4, 6), 16);
 
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const pixels = imageData.data;
-                const colorsCounts = {};
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
 
-                // sample every 4th pixel
-                const sampleRate = 4;
-                for (let i = 0; i < pixels.length; i += 4 * sampleRate) {
-                    const r = pixels[i];
-                    const g = pixels[i + 1];
-                    const b = pixels[i + 2];
-                    const alpha = pixels[i + 3];
-                    
-                    if (alpha < 128) continue;
-                    
-                    // skip very dark and very light colors
-                    const brightness = (r + g + b) / 3;
-                    if (brightness < 60 || brightness > 225) continue;
-                    
-                    const quantizeLevel = 32;
-                    const qR = Math.floor(r / quantizeLevel) * quantizeLevel;
-                    const qG = Math.floor(g / quantizeLevel) * quantizeLevel;
-                    const qB = Math.floor(b / quantizeLevel) * quantizeLevel;
-                    
-                    const colorKey = `${qR},${qG},${qB}`;
-                    colorsCounts[colorKey] = (colorsCounts[colorKey] || 0) + 1;
-                }
-
-                let maxCount = 0;
-                let dominantColor = '#cfcfcf';
-
-                for (const colorKey in colorsCounts) {
-                    if (colorsCounts[colorKey] > maxCount) {
-                        maxCount = colorsCounts[colorKey];
-                        const [r, g, b] = colorKey.split(',').map(Number);
-                        dominantColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-                    }
-                }
-
-                // set text color 
-                const color = dominantColor.replace('#', '');        
-                const r = parseInt(color.slice(0, 2), 16);
-                const g = parseInt(color.slice(2, 4), 16);
-                const b = parseInt(color.slice(4, 6), 16);
-                        
-                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                const textColor = luminance > 0.5 ? '#000000' : '#ffffff';
-
-                coverColors.cover = dominantColor;
-                coverColors.text = textColor;
-                
-            } catch (error) {
-                console.error('Error processing image for color extraction:', error);
-                coverColors.cover = '#cfcfcf';
-                coverColors.text = '#000000';
-            }
-        };
-
-        img.onerror = () => {
-            console.error('Failed to load image for color extraction:', albumCoverPath);
-            coverColors.cover = '#cfcfcf';
-            coverColors.text = '#000000';
-        };
+        coverColors.cover = dominantColor;
+        coverColors.text = textColor;
     }
 
     /* SEARCH */
@@ -818,14 +758,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sortByArtist.classList.add('selected');
                 sortByYear.classList.remove('selected');
                 sortByDateAdded.classList.remove('selected');
+                sortByColor.classList.remove('selected');
             } else if (sortingOptions.method === 'year') {
                 sortByArtist.classList.remove('selected');
                 sortByYear.classList.add('selected');
                 sortByDateAdded.classList.remove('selected');
+                sortByColor.classList.remove('selected');
             } else if (sortingOptions.method === 'dateAdded') {
                 sortByArtist.classList.remove('selected');
                 sortByYear.classList.remove('selected');
                 sortByDateAdded.classList.add('selected');
+                sortByColor.classList.remove('selected');
+            } else if (sortingOptions.method === 'color') {
+                sortByArtist.classList.remove('selected');
+                sortByYear.classList.remove('selected');
+                sortByDateAdded.classList.remove('selected');
+                sortByColor.classList.add('selected');
             }
             if (sortingOptions.order === 'ascending') {
                 ascending.classList.add('selected');
@@ -859,6 +807,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     sortByDateAdded.addEventListener('click', async () => {
         if (sortingOptions.method !== 'dateAdded') {
             sortingOptions.method = 'dateAdded';
+            await updateSorting();
+        }
+
+        sortMenuContent.classList.remove('show');
+    });
+
+    sortByColor.addEventListener('click', async () => {
+        if (sortingOptions.method !== 'color') {
+            sortingOptions.method = 'color';
             await updateSorting();
         }
 

@@ -1,6 +1,6 @@
 {
   "name": "what-to-spin",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "main": "src/main.js",
   "homepage": ".",
   "author": "Ethan Burmane <ethanburmane@gmail.com>",
@@ -166,6 +166,7 @@
     "@playwright/test": "^1.54.2",
     "album-art": "^4.0.0",
     "electron-updater": "^6.1.7",
+    "hexsorter": "^1.5.0",
     "playwright": "^1.54.2"
   }
 }
