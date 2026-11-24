@@ -6,8 +6,10 @@ async function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 600,
         height: 380,
+        minWidth: 600,
+        minHeight: 380,
         show: false,
-        resizable: false,
+        resizable: true,
         titleBarStyle: 'customButtonsOnHover',
         webPreferences: {
             contextIsolation: true,
@@ -15,6 +17,8 @@ async function createWindow() {
             preload: path.join(__dirname, 'preload.js')
         }
     });
+
+    mainWindow.setAspectRatio(600/380);
 
     mainWindow.loadFile(path.join(__dirname, 'index.html'));
     mainWindow.show();
