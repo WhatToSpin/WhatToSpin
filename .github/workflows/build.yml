@@ -19,6 +19,9 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -58,9 +61,7 @@ jobs:
         run: npm ci
 
       - name: Build Electron app
-        run: npm run build:${{ matrix.platform }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:${{ matrix.platform }} -- --publish never
 
       - name: Upload artifacts (Windows)
         if: matrix.platform == 'win'
